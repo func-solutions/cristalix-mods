@@ -1,0 +1,48 @@
+
+buildscript {
+    repositories {
+        google()
+        jcenter()
+        maven {
+            url "https://repo.implario.dev/public"
+        }
+    }
+    dependencies {
+        classpath("com.android.tools.build:gradle:3.3.0")
+        classpath("com.guardsquare:proguard-gradle:7.0.0")
+        classpath("ru.cristalix:bundler:2.1.3")
+    }
+}
+
+
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version '1.4.30'
+}
+
+apply plugin: 'ru.cristalix.uiengine.bundler'
+
+bundler.name = "Test mod"
+bundler.mainClass = "ru.cristalix.modtest.TestMod"
+bundler.version = "1.0"
+bundler.author = "Cristalix community"
+
+
+repositories {
+    mavenCentral()
+    maven {
+        url 'https://repo.implario.dev/public'
+    }
+}
+
+dependencies {
+    compileOnly 'dev.xdark:clientapi:1.0.3'
+    compileOnly 'org.lwjgl.lwjgl:lwjgl:2.9.3'
+    compileOnly 'org.lwjgl.lwjgl:lwjgl_util:2.9.3'
+    implementation 'ru.cristalix:uiengine:3.0.2'
+    implementation group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib', version: '1.4.30'
+}
+
+jar {
+    from configurations.runtimeClasspath.collect { it.directory ? it : zipTree(it) }
+}
+
