@@ -1,0 +1,8 @@
+
+bundler {
+    name 'Armor HUD'
+    mainClass 'ru.cristalix.mods.armorhud.ArmorHudMod'
+    version '2.0'
+    author 'DelfikPro'
+}
+

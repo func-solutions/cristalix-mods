@@ -1,0 +1,8 @@
+
+bundler {
+    name 'HUD Effects'
+    mainClass 'ru.cristalix.mods.effects.EffectsMod'
+    version '1.0'
+    author 'DelfikPro'
+}
+

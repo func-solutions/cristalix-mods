@@ -1,2 +1,3 @@
-rootProject.name = 'mod-test'
+rootProject.name = 'cristalix-mods'
 
+include 'mod-armor-hud', 'mod-indicators', 'mod-effects'
