@@ -1,0 +1,8 @@
+
+bundler {
+    name 'Balance'
+    mainClass 'ru.cristalix.mods.balance.BalanceMod'
+    version '1.0'
+    author 'DelfikPro'
+}
+

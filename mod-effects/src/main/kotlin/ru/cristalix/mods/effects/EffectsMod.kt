@@ -3,6 +3,7 @@ package ru.cristalix.mods.effects
 import dev.xdark.clientapi.ClientApi
 import dev.xdark.clientapi.entry.ModMain
 import dev.xdark.clientapi.event.input.KeyPress
+import dev.xdark.clientapi.event.network.PluginMessage
 import dev.xdark.clientapi.event.render.ScaleChange
 import dev.xdark.clientapi.event.window.WindowResize
 import dev.xdark.clientapi.item.Item
