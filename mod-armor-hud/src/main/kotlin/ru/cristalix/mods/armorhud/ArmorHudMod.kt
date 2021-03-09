@@ -4,6 +4,7 @@ import dev.xdark.clientapi.ClientApi
 import dev.xdark.clientapi.entry.ModMain
 import dev.xdark.clientapi.event.input.KeyPress
 import dev.xdark.clientapi.event.lifecycle.GameLoop
+import dev.xdark.clientapi.event.network.PluginMessage
 import dev.xdark.clientapi.event.render.GuiOverlayRender
 import dev.xdark.clientapi.opengl.GlStateManager
 import org.lwjgl.input.Keyboard
@@ -14,7 +15,7 @@ import ru.cristalix.uiengine.UIEngine
 import ru.cristalix.uiengine.element.*
 import ru.cristalix.uiengine.utility.*
 
-class TestMod : ModMain {
+class ArmorHudMod : ModMain {
 
     var dragging: Boolean = false
     var draggingX: Double = 0.0
@@ -30,6 +31,14 @@ class TestMod : ModMain {
 
     override fun load(api: ClientApi) {
         UIEngine.initialize(api)
+
+        val listener = api.messageBus().createListener()
+        api.messageBus().register(listener, PluginMessage::class.java, {
+            if (it.channel == "armorhud-unload") {
+                UIEngine.uninitialize()
+                api.messageBus().unregisterAll(listener)
+            }
+        }, 1)
 
         UIEngine.registerHandler(KeyPress::class.java, {
             if (key == Keyboard.KEY_PAUSE) UIEngine.uninitialize()
