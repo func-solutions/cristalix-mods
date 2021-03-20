@@ -1,3 +1,9 @@
 rootProject.name = 'cristalix-mods'
 
-include 'mod-armor-hud', 'mod-indicators', 'mod-effects', 'mod-balance'
+include 'mod-armor-hud',
+        'mod-indicators',
+        'mod-effects',
+        'mod-balance',
+        'mod-dungeons',
+        'mod-among-us',
+        'mod-holograms'

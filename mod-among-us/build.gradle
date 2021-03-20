@@ -1,0 +1,8 @@
+
+bundler {
+    name 'Among us'
+    mainClass 'ru.cristalix.mods.amongus.AmongUsMod'
+    version '2.0'
+    author 'DelfikPro'
+}
+

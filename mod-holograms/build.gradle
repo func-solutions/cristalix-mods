@@ -1,0 +1,7 @@
+
+bundler {
+    name 'Holograms'
+    author 'delfikpro'
+    version '1.0'
+    mainClass 'ru.cristalix.mods.holograms.HologramsMod'
+}

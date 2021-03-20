@@ -1,0 +1,7 @@
+
+bundler {
+    name 'Dungeons mod'
+    version '1.0'
+    mainClass 'ru.cristalix.mods.dungeons.DungeonsMod'
+    author 'DelfikPro'
+}

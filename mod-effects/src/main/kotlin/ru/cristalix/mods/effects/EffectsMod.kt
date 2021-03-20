@@ -109,7 +109,7 @@ class EffectsMod : ModMain {
 
 
         val createListener = clientApi.messageBus().createListener()
-        clientApi.eventBus().register(createListener, PluginMessage::class.java, {
+        clientApi.messageBus().register(createListener, PluginMessage::class.java, {
             if (it.channel == "highlight") {
                 highlightTask?.cancelled = true
 
@@ -151,29 +151,29 @@ class EffectsMod : ModMain {
         UIEngine.registerHandler(KeyPress::class.java, {
 
             when (key) {
-//                Keyboard.KEY_J -> {
-//                    highlightTask?.cancelled = true
-//
-//                    highlight.animate(0.5, Easings.QUART_OUT) {
-//                        color.alpha = 0.65
-//                    }
-//
-//                    UIEngine.overlayContext.schedule(0.6) {
-//                        highlight.animate(0.4, Easings.QUART_OUT) {
-//                            color.alpha = 0.0
-//                        }
-//                    }
-//                }
-//
-//                Keyboard.KEY_K -> {
-//
-//                    clientApi.overlayRenderer().displayItemActivation(ItemStack.of(Item.of(378), 1, 0))
-//
-//                }
+                Keyboard.KEY_J -> {
+                    highlightTask?.cancelled = true
 
-                Keyboard.KEY_PAUSE -> {
-                    unload()
+                    highlight.animate(0.5, Easings.QUART_OUT) {
+                        color.alpha = 0.65
+                    }
+
+                    UIEngine.overlayContext.schedule(0.6) {
+                        highlight.animate(0.4, Easings.QUART_OUT) {
+                            color.alpha = 0.0
+                        }
+                    }
                 }
+
+                Keyboard.KEY_K -> {
+
+                    clientApi.overlayRenderer().displayItemActivation(ItemStack.of(Item.of(378), 1, 0))
+
+                }
+
+//                Keyboard.KEY_PAUSE -> {
+//                    unload()
+//                }
             }
 
 

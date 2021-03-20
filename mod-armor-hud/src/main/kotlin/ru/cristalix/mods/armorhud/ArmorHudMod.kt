@@ -1,5 +1,6 @@
 package ru.cristalix.mods.armorhud
 
+import com.google.gson.Gson
 import dev.xdark.clientapi.ClientApi
 import dev.xdark.clientapi.entry.ModMain
 import dev.xdark.clientapi.event.input.KeyPress
@@ -13,12 +14,20 @@ import org.lwjgl.opengl.GL11
 import ru.cristalix.uiengine.UIEngine
 import ru.cristalix.uiengine.element.*
 import ru.cristalix.uiengine.utility.*
+import java.lang.Double.max
+import java.lang.Exception
+import java.nio.charset.StandardCharsets
+import java.nio.file.Files
+import java.nio.file.Paths
+import kotlin.math.max
+import kotlin.math.min
 
-class TestMod : ModMain {
+class ArmorHudMod : ModMain {
 
     var dragging: Boolean = false
     var draggingX: Double = 0.0
     var draggingY: Double = 0.0
+    val gson = Gson()
 
     fun getMouse(): V2 {
         val resolution = UIEngine.clientApi.resolution()
@@ -39,13 +48,15 @@ class TestMod : ModMain {
             size = V3(50.0, 50.0)
 //            color = Color(0, 0, 0, 0.5)
             onClick = onClick@{ _: AbstractElement, b: Boolean, _: MouseButton ->
-//                if (!Mouse.isGrabbed()) return@onClick
+                if (Mouse.isGrabbed()) return@onClick
                 dragging = b
                 if (b) {
                     val mouse = getMouse()
                     val resolution = api.resolution()
                     draggingX = mouse.x - this.offset.x - this.align.x * resolution.scaledWidth_double + this.origin.x * this.size.x
                     draggingY = mouse.y - this.offset.y - this.align.y * resolution.scaledHeight_double + this.origin.y * this.size.y
+                } else {
+                    saveSettigs(Settings(align.x, align.y, offset.x, offset.y, 1.0, "normal", true))
                 }
             }
         }
@@ -110,15 +121,13 @@ class TestMod : ModMain {
                             stack = api.itemRegistry().getItem(1).newStack(1, 1)
                         },
                         text {
-                            align = Relative.BOTTOM_RIGHT
-                            origin = Relative.BOTTOM_RIGHT
                             beforeRender = {
                                 GlStateManager.disableDepth()
                             }
                             afterRender = {
                                 GlStateManager.enableDepth()
                             }
-                            offset = V3(3.0, 1.0, -1.0)
+                            offset = V3(19.0, 3.0, -1.0)
                             shadow = true
                         }
                     )
@@ -126,12 +135,18 @@ class TestMod : ModMain {
             )
         }
 
-        val slotSize = 18.0
+        UIEngine.registerHandler(KeyPress::class.java, {
+            if (key == Keyboard.KEY_J) UIEngine.uninitialize()
+        })
+
+        val slotSize = 17.0
 
         fun reload(settings: Settings) {
 
             armorIndicators.align.x = settings.alignX
             armorIndicators.align.y = settings.alignY
+            armorIndicators.origin.x = settings.alignX
+            armorIndicators.origin.y = settings.alignY
             armorIndicators.offset.x = settings.offsetX
             armorIndicators.offset.y = settings.offsetY
 
@@ -157,17 +172,39 @@ class TestMod : ModMain {
                 val stack = inventory.getStackInSlot(it)
                 (container.children[0] as ItemElement).stack =
                     stack
-                (container.children[1] as TextElement).content =
-                    if (stack.isDamageable) ((1.0 - stack.itemDamage.toDouble() / stack.maxDamage) * 100).toInt().toString() + "%" else ""
+                val percentage = 1.0 - stack.itemDamage.toDouble() / stack.maxDamage
+                val textElement = container.children[1] as TextElement
+                textElement.content = if (stack.isDamageable) (percentage * 100).toInt().toString() + "%" else ""
+                textElement.color.green = (percentage * 2 * 255).toInt().coerceIn(150..255)
+                textElement.color.red = ((1-percentage) * 2 * 255).toInt().coerceIn(150..255)
+                textElement.color.blue = 150
                 i++
             }
         })
 
         reload(
-            Settings(
-                0.0, 0.0, 0.0, 0.0, 1.0, "", true
+            readSettings() ?: Settings(
+                1.0, 0.0, -60.0, 0.0, 1.0, "", true
             )
         )
+    }
+
+    private fun saveSettigs(settings: Settings) {
+        try {
+            Files.write(Paths.get("armorhud.json"), gson.toJson(settings).toByteArray());
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+        }
+    }
+
+    private fun readSettings(): Settings? {
+        try {
+            val readAllLines = Files.readAllLines(Paths.get("armorhud.json"))
+            if (readAllLines == null || readAllLines.isEmpty()) return null;
+            return gson.fromJson(readAllLines.get(0), Settings::class.java)
+        } catch (exception: Exception) {
+            return null
+        }
     }
 
     override fun unload() {

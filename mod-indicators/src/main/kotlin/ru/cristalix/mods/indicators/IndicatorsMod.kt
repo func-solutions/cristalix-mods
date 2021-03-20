@@ -2,6 +2,7 @@ package ru.cristalix.mods.indicators
 
 import dev.xdark.clientapi.ClientApi
 import dev.xdark.clientapi.entity.EntityLivingBase
+import dev.xdark.clientapi.entity.EntityPlayer
 import dev.xdark.clientapi.entry.ModMain
 import dev.xdark.clientapi.event.input.KeyPress
 import dev.xdark.clientapi.event.render.NameTemplateRender
@@ -22,11 +23,11 @@ class IndicatorsMod : ModMain {
         UIEngine.initialize(clientApi)
 
         val context = Context3D(V3())
-        val caption = text {
-            scale = V3(0.5, 0.5, 0.5)
-            origin = Relative.CENTER
-            align = Relative.CENTER
-        }
+//        val caption = text {
+//            scale = V3(0.5, 0.5, 0.5)
+//            origin = Relative.CENTER
+//            align = Relative.CENTER
+//        }
 
         val bar = rectangle {
             origin = Relative.LEFT
@@ -41,7 +42,7 @@ class IndicatorsMod : ModMain {
             size = V3(16.0, 4.0)
             color = Color(0, 0, 0, 0.5)
             origin = Relative.CENTER
-            addChild(bar, caption)
+            addChild(bar)
 
         }
 
@@ -61,10 +62,10 @@ class IndicatorsMod : ModMain {
             if (entity !is EntityLivingBase) return@a
             val entity = entity as EntityLivingBase
 
-            isCancelled = true
+            if (entity !is EntityPlayer) isCancelled = true
 
             val part = entity.health / entity.maxHealth
-            if (part == 1f) return@a
+//            if (part == 1f) return@a
 
             val partialTicks = clientApi.minecraft().timer.renderPartialTicks
 
@@ -72,7 +73,7 @@ class IndicatorsMod : ModMain {
 
             context.offset = V3(
                 entity.lastX + (entity.x - entity.lastX) * partialTicks,
-                entity.lastY + (entity.y - entity.lastY) * partialTicks + entity.eyeHeight + 0.6,
+                entity.lastY + (entity.y - entity.lastY) * partialTicks + entity.eyeHeight + 1,
                 entity.lastZ + (entity.z - entity.lastZ) * partialTicks
             )
 
@@ -87,7 +88,7 @@ class IndicatorsMod : ModMain {
             if (red > 1) red = 1f
             bar.color.green = (green * 255).toInt()
             bar.color.red = (red * 255).toInt()
-            caption.content = "" + entity.health + "/" + entity.maxHealth
+//            caption.content = "" + entity.health + "/" + entity.maxHealth
 
 
             GlStateManager.disableLighting()

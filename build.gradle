@@ -13,6 +13,7 @@ buildscript {
 
 plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.4.30'
+    id 'org.hidetake.ssh' version '2.10.1'
 }
 
 allprojects {
@@ -39,6 +40,12 @@ subprojects {
         }
     }
 
+    afterEvaluate {
+        jarFlattened.doFirst {
+            dontobfuscate()
+        }
+    }
+
     sourceCompatibility = '1.8'
     targetCompatibility = '1.8'
 
@@ -53,9 +60,10 @@ subprojects {
 
         implementation group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib', version: '1.4.30'
 
-        compileOnly 'dev.xdark:clientapi:1.0.6'
+        compileOnly 'dev.xdark:clientapi:1.0.7'
         compileOnly 'ru.cristalix:client-api-libs:all'
-        implementation 'ru.cristalix:uiengine:3.5.3'
+        compileOnly 'dev.xdark:feder:1.0-SNAPSHOT'
+        implementation 'ru.cristalix:uiengine:3.5.4'
 
     }
 
@@ -64,4 +72,4 @@ subprojects {
     }
 }
 
-
+if (file('upload.gradle').file) apply from: 'upload.gradle'

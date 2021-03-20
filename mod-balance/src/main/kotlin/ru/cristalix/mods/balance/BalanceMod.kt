@@ -2,9 +2,12 @@ package ru.cristalix.mods.balance
 
 import dev.xdark.clientapi.ClientApi
 import dev.xdark.clientapi.entry.ModMain
+import dev.xdark.clientapi.event.input.KeyPress
 import dev.xdark.clientapi.event.network.PluginMessage
+import org.lwjgl.input.Keyboard.KEY_J
 import ru.cristalix.uiengine.UIEngine
 import ru.cristalix.uiengine.element.RectangleElement
+import ru.cristalix.uiengine.element.TextElement
 import ru.cristalix.uiengine.element.animate
 import ru.cristalix.uiengine.utility.*
 import kotlin.math.absoluteValue
@@ -12,16 +15,19 @@ import kotlin.math.absoluteValue
 class BalanceMod : ModMain {
 
     private var balance = 0.0
-    private val balanceText = text {
-        content = pretty()
-        origin = Relative.BOTTOM_RIGHT
-        shadow = true
-    }
+    private lateinit var balanceText: TextElement
 
     private lateinit var box: RectangleElement
 
     override fun load(clientApi: ClientApi) {
         UIEngine.initialize(clientApi)
+
+        balanceText = text {
+            content = pretty()
+
+            origin = ru.cristalix.uiengine.utility.Relative.BOTTOM_RIGHT
+            shadow = true
+        }
 
         box = rectangle {
             align = Relative.BOTTOM_RIGHT
@@ -39,6 +45,15 @@ class BalanceMod : ModMain {
                 balanceText.content = pretty()
             }
         }, 1)
+
+        UIEngine.registerHandler(KeyPress::class.java, {
+            if (key == KEY_J) {
+                val change = Math.random() * 8374587 - 4000000
+                addBalance(change)
+                balance += change
+                balanceText.content = pretty()
+            }
+        })
 
 
     }
