@@ -5,6 +5,7 @@ import dev.xdark.clientapi.ClientApi
 import dev.xdark.clientapi.entry.ModMain
 import dev.xdark.clientapi.event.input.KeyPress
 import dev.xdark.clientapi.event.lifecycle.GameLoop
+import dev.xdark.clientapi.event.network.PluginMessage
 import dev.xdark.clientapi.event.render.GuiOverlayRender
 import dev.xdark.clientapi.opengl.GlStateManager
 import org.lwjgl.input.Keyboard
@@ -39,6 +40,14 @@ class ArmorHudMod : ModMain {
 
     override fun load(api: ClientApi) {
         UIEngine.initialize(api)
+
+        val listener = api.messageBus().createListener()
+        api.messageBus().register(listener, PluginMessage::class.java, {
+            if (it.channel == "armorhud-unload") {
+                UIEngine.uninitialize()
+                api.messageBus().unregisterAll(listener)
+            }
+        }, 1)
 
         UIEngine.registerHandler(KeyPress::class.java, {
             if (key == Keyboard.KEY_PAUSE) UIEngine.uninitialize()
