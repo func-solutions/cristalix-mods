@@ -40,12 +40,13 @@ class AmongUsMod : ModMain {
 
     override fun load(api: ClientApi) {
         UIEngine.initialize(api)
-        val listener = api.messageBus().createListener()
-        api.messageBus().register(listener, PluginMessage::class.java, {
-            val json = NetUtil.readUtf8(it.data, 65536)
-            val map = gson.fromJson(json, MapData::class.java)
-            createMinimap(map)
-        }, 1)
+        UIEngine.registerHandler(PluginMessage::class.java) {
+            if (channel == "amongus") {
+                val json = NetUtil.readUtf8(data, 65536)
+                val map = gson.fromJson(json, MapData::class.java)
+                createMinimap(map)
+            }
+        }
 
 //        createMinimap(miraHq)
     }
@@ -140,7 +141,7 @@ class AmongUsMod : ModMain {
 
         UIEngine.overlayContext.addChild(minimapContainer)
 
-        UIEngine.registerHandler(GuiOverlayRender::class.java, {
+        UIEngine.registerHandler(GuiOverlayRender::class.java) {
             val player = UIEngine.clientApi.minecraft().player
 
             val rotation = -player.rotationYaw * PI / 180
@@ -157,7 +158,7 @@ class AmongUsMod : ModMain {
             minimap.origin.y =
                 -(player.lastZ + (player.z - player.lastZ) * partialTicks - mapData.maxZ) / mapData.textureSize
 
-        })
+        }
     }
 
     override fun unload() {

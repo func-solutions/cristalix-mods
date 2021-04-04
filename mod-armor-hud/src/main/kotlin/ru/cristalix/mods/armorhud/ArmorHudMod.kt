@@ -40,9 +40,9 @@ class ArmorHudMod : ModMain {
     override fun load(api: ClientApi) {
         UIEngine.initialize(api)
 
-        UIEngine.registerHandler(KeyPress::class.java, {
+        UIEngine.registerHandler(KeyPress::class.java) {
             if (key == Keyboard.KEY_PAUSE) UIEngine.uninitialize()
-        })
+        }
 
         val armorIndicators = rectangle {
             size = V3(50.0, 50.0)
@@ -70,7 +70,7 @@ class ArmorHudMod : ModMain {
 //        })
 
 
-        UIEngine.registerHandler(GameLoop::class.java, {
+        UIEngine.registerHandler(GameLoop::class.java) {
             if (dragging) {
                 val resolution = api.resolution()
                 val factor = resolution.scaleFactor
@@ -105,7 +105,7 @@ class ArmorHudMod : ModMain {
 
                 if (!Mouse.isButtonDown(0)) dragging = false
             }
-        })
+        }
 
 
         UIEngine.overlayContext.addChild(armorIndicators)
@@ -135,9 +135,9 @@ class ArmorHudMod : ModMain {
             )
         }
 
-        UIEngine.registerHandler(KeyPress::class.java, {
+        UIEngine.registerHandler(KeyPress::class.java) {
             if (key == Keyboard.KEY_J) UIEngine.uninitialize()
-        })
+        }
 
         val slotSize = 17.0
 
@@ -164,7 +164,7 @@ class ArmorHudMod : ModMain {
         }
 
 
-        UIEngine.registerHandler(GameLoop::class.java, {
+        UIEngine.registerHandler(GameLoop::class.java) {
             val inventory = api.minecraft().player.inventory
             var i = 0
             IntRange(36, 39).forEach {
@@ -180,7 +180,7 @@ class ArmorHudMod : ModMain {
                 textElement.color.blue = 150
                 i++
             }
-        })
+        }
 
         reload(
             readSettings() ?: Settings(
