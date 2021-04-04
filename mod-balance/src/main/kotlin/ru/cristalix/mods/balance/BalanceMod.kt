@@ -31,7 +31,7 @@ class BalanceMod : ModMain {
 
         box = rectangle {
             align = Relative.BOTTOM_RIGHT
-            offset = V3(-3.0, -15.0)
+            offset = V3(-3.0, -14.0)
             addChild(balanceText)
         }
 
@@ -46,14 +46,14 @@ class BalanceMod : ModMain {
             }
         }, 1)
 
-        UIEngine.registerHandler(KeyPress::class.java, {
-            if (key == KEY_J) {
-                val change = Math.random() * 8374587 - 4000000
-                addBalance(change)
-                balance += change
-                balanceText.content = pretty()
-            }
-        })
+//        UIEngine.registerHandler(KeyPress::class.java, {
+//            if (key == KEY_J) {
+//                val change = Math.random() * 8374587 - 4000000
+//                addBalance(change)
+//                balance += change
+//                balanceText.content = pretty()
+//            }
+//        })
 
 
     }
@@ -67,7 +67,7 @@ class BalanceMod : ModMain {
         val str = ss[0]
 
         str.reversed().forEach {
-            newStr = it + if (digits++ == 2) "," else "" + newStr
+            newStr = it + if (digits++ == 2) ",$newStr" else "" + newStr
             if (digits == 3) digits = 0
         }
         return if (ss.size < 2) newStr else (newStr + '.' + ss[1])

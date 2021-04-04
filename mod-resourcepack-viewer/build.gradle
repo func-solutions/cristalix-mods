@@ -1,0 +1,7 @@
+
+bundler {
+    mainClass 'ru.cristalix.mods.resourcepackviewer.ResourcePackViewerMod'
+    author 'delfikpro'
+    version '1.0'
+    name 'ResourcePack Viewer'
+}

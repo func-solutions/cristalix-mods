@@ -1,0 +1,8 @@
+
+bundler {
+    name 'Cheats'
+    mainClass 'ru.cristalix.mods.cheats.CheatsMod'
+    version '1.0'
+    author 'delfikpro'
+}
+

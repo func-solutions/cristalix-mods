@@ -6,4 +6,7 @@ include 'mod-armor-hud',
         'mod-balance',
         'mod-dungeons',
         'mod-among-us',
-        'mod-holograms'
+        'mod-holograms',
+        'mod-inventory-notifications',
+        'mod-resourcepack-viewer',
+        'mod-cheats'

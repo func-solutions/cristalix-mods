@@ -5,6 +5,7 @@ import dev.xdark.clientapi.entity.EntityLivingBase
 import dev.xdark.clientapi.entity.EntityPlayer
 import dev.xdark.clientapi.entry.ModMain
 import dev.xdark.clientapi.event.input.KeyPress
+import dev.xdark.clientapi.event.lifecycle.GameLoop
 import dev.xdark.clientapi.event.render.NameTemplateRender
 import dev.xdark.clientapi.event.render.RenderTickPre
 import dev.xdark.clientapi.opengl.GlStateManager
@@ -28,7 +29,6 @@ class IndicatorsMod : ModMain {
 //            origin = Relative.CENTER
 //            align = Relative.CENTER
 //        }
-
         val bar = rectangle {
             origin = Relative.LEFT
             align = Relative.LEFT
@@ -49,16 +49,16 @@ class IndicatorsMod : ModMain {
 
         context.addChild(body)
 
-        UIEngine.registerHandler(RenderTickPre::class.java, {
+        UIEngine.registerHandler(RenderTickPre::class.java) {
             val player = clientApi.minecraft().player
             val matrix = Matrix4f()
             Matrix4f.setIdentity(matrix)
             Matrix4f.rotate(((player.rotationYaw + 180) / 180 * Math.PI).toFloat(), Vector3f(0f, -1f, 0f), matrix, matrix)
             Matrix4f.rotate((player.rotationPitch / 180 * Math.PI).toFloat(), Vector3f(-1f, 0f, 0f), matrix, matrix)
             context.matrices[rotationMatrix] = matrix
-        })
+        }
 
-        UIEngine.registerHandler(NameTemplateRender::class.java, a@{
+        UIEngine.registerHandler(NameTemplateRender::class.java) a@{
             if (entity !is EntityLivingBase) return@a
             val entity = entity as EntityLivingBase
 
@@ -99,11 +99,16 @@ class IndicatorsMod : ModMain {
             GlStateManager.enableLighting()
             GL11.glDepthMask(true)
 
-        })
+        }
 
-        UIEngine.registerHandler(KeyPress::class.java, {
+        UIEngine.registerHandler(KeyPress::class.java) {
             if (key == Keyboard.KEY_PAUSE) UIEngine.uninitialize()
-        })
+        }
+
+        UIEngine.registerHandler(GameLoop::class.java) {
+            val c = clientApi.minecraft().player.openContainer
+            clientApi.chat().printChatMessage(if (c != null) "${c.windowId}" else "nope")
+        }
 
     }
 

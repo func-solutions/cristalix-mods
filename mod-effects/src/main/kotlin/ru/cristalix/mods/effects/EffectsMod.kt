@@ -12,6 +12,7 @@ import dev.xdark.clientapi.item.ItemTools
 import dev.xdark.clientapi.opengl.GlStateManager
 import dev.xdark.clientapi.opengl.RenderHelper
 import dev.xdark.clientapi.render.DefaultVertexFormats
+import dev.xdark.clientapi.util.EnumHand
 import dev.xdark.feder.NetUtil
 import org.lwjgl.input.Keyboard
 import org.lwjgl.opengl.GL11
@@ -77,20 +78,24 @@ class EffectsMod : ModMain {
 //        ctx.addChild(cube)
 //        UIEngine.worldContexts.add(ctx)
 
-        UIEngine.registerHandler(ScaleChange::class.java, {
+        UIEngine.registerHandler(ScaleChange::class.java) {
             highlight.size.x = clientApi.resolution().scaledWidth_double
             highlight.size.y = clientApi.resolution().scaledHeight_double
-        })
-        UIEngine.registerHandler(WindowResize::class.java, {
+        }
+        UIEngine.registerHandler(WindowResize::class.java) {
             highlight.size.x = resolution.scaledWidth_double
             highlight.size.y = resolution.scaledHeight_double
-        })
+        }
 
         UIEngine.overlayContext.addChild(highlight)
 
 
         val title = text {
             content = "§7???"
+//            offset.z = -172.0
+            beforeRender = {
+                GlStateManager.disableDepth()
+            }
             align = V3(0.5, 0.6)
             origin = Relative.BOTTOM
             scale = V3(0.0, 0.0, 0.0)
@@ -98,7 +103,11 @@ class EffectsMod : ModMain {
         }
         val subtitle = text {
             content = "§7???"
+//            offset.z = -172.0
             align = V3(0.5, 0.6)
+            afterRender = {
+                GlStateManager.enableDepth()
+            }
             offset.y = 1.0
             origin = Relative.TOP
             scale = V3(0.0, 0.0, 0.0)
@@ -147,37 +156,41 @@ class EffectsMod : ModMain {
                 }
             }
         }, 1)
-
-        UIEngine.registerHandler(KeyPress::class.java, {
-
-            when (key) {
-                Keyboard.KEY_J -> {
-                    highlightTask?.cancelled = true
-
-                    highlight.animate(0.5, Easings.QUART_OUT) {
-                        color.alpha = 0.65
-                    }
-
-                    UIEngine.overlayContext.schedule(0.6) {
-                        highlight.animate(0.4, Easings.QUART_OUT) {
-                            color.alpha = 0.0
-                        }
-                    }
-                }
-
-                Keyboard.KEY_K -> {
-
-                    clientApi.overlayRenderer().displayItemActivation(ItemStack.of(Item.of(378), 1, 0))
-
-                }
+        
+//        UIEngine.registerHandler(KeyPress::class.java) {
+//
+//            when (key) {
+//                Keyboard.KEY_U -> {
+//                    clientApi.minecraft().player.swingArm(EnumHand.MAIN_HAND)
+//                }
+//
+//                Keyboard.KEY_J -> {
+//                    highlightTask?.cancelled = true
+//
+//                    highlight.animate(0.5, Easings.QUART_OUT) {
+//                        color.alpha = 0.65
+//                    }
+//
+//                    UIEngine.overlayContext.schedule(0.6) {
+//                        highlight.animate(0.4, Easings.QUART_OUT) {
+//                            color.alpha = 0.0
+//                        }
+//                    }
+//                }
+//
+//                Keyboard.KEY_K -> {
+//
+//                    clientApi.overlayRenderer().displayItemActivation(ItemStack.of(Item.of(378), 1, 0))
+//
+//                }
 
 //                Keyboard.KEY_PAUSE -> {
 //                    unload()
 //                }
-            }
-
-
-        })
+//            }
+//
+//
+//        }
 
 
 

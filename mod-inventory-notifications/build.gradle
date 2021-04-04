@@ -1,0 +1,7 @@
+
+bundler {
+    mainClass 'ru.cristalix.mods.inventorynotifications.InventoryNotificationsMod'
+    version '1.0'
+    author 'delfikpro'
+    name 'Inventory notifications'
+}
