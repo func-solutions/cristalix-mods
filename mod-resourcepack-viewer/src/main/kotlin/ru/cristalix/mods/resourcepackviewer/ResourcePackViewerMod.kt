@@ -1,5 +1,6 @@
 package ru.cristalix.mods.resourcepackviewer
 
+import KotlinMod
 import com.mojang.authlib.GameProfile
 import dev.xdark.clientapi.ClientApi
 import dev.xdark.clientapi.entity.EntityPlayer
@@ -45,7 +46,7 @@ import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
 
-class ResourcePackViewerMod : ModMain {
+class ResourcePackViewerMod : KotlinMod() {
 
     var ix = 0
     var gx = 0
@@ -62,12 +63,12 @@ class ResourcePackViewerMod : ModMain {
 
     var currentItem: ItemStack? = null
 
-    override fun load(clientApi: ClientApi) {
-        UIEngine.initialize(clientApi)
+    override fun onEnable() {
+        UIEngine.initialize(this)
 
         itemDiv = rectangle {
-            align = Relative.TOP
-            origin = Relative.TOP
+            align = TOP
+            origin = TOP
             size.x = 18.0*22
         }
 
@@ -101,7 +102,7 @@ class ResourcePackViewerMod : ModMain {
         }
 
         UIEngine.overlayContext.addChild(rectangle {
-            align = Relative.RIGHT
+            align = RIGHT
             offset.x = -60.0
             offset.y = 60.0
             color = WHITE
@@ -258,8 +259,8 @@ class ResourcePackViewerMod : ModMain {
                             addChild(item {
                                 stack = item
                                 color = WHITE
-                                align = Relative.CENTER
-                                origin = Relative.CENTER
+                                align = CENTER
+                                origin = CENTER
                             })
                             size.x = 18.0
                             size.y = 18.0
@@ -314,11 +315,6 @@ class ResourcePackViewerMod : ModMain {
             println("Error while loading $path")
             e.printStackTrace()
         }
-    }
-
-    override fun unload() {
-        disabled = true
-        UIEngine.uninitialize()
     }
 
 }

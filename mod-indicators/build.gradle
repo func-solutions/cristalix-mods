@@ -6,3 +6,18 @@ bundler {
     author 'DelfikPro'
 }
 
+jar {
+    exclude "**/*.kotlin_metadata"
+    exclude "**/*.kotlin_builtins"
+    exclude "**/*.kotlin_module"
+    duplicatesStrategy DuplicatesStrategy.FAIL
+}
+
+afterEvaluate {
+    tasks.bundle {
+        doFirst {
+            libraryJarFiles.forEach {println it}
+            inJarFiles.forEach {println it}
+        }
+    }
+}

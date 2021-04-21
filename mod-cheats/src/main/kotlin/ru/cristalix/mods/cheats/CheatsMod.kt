@@ -1,40 +1,28 @@
 package ru.cristalix.mods.cheats
 
-import com.sun.java.accessibility.util.GUIInitializedListener
-import dev.xdark.clientapi.ClientApi
+import KotlinMod
 import dev.xdark.clientapi.entity.EntityPlayer
-import dev.xdark.clientapi.entry.ModMain
 import dev.xdark.clientapi.event.chat.ChatSend
 import dev.xdark.clientapi.event.entity.PlayerJump
 import dev.xdark.clientapi.event.input.KeyPress
-import dev.xdark.clientapi.event.input.MousePress
 import dev.xdark.clientapi.event.lifecycle.GameLoop
 import dev.xdark.clientapi.event.render.GuiOverlayRender
-import dev.xdark.clientapi.event.render.HotbarRender
 import dev.xdark.clientapi.event.render.NameTemplateRender
 import dev.xdark.clientapi.event.render.RenderTickPre
 import dev.xdark.clientapi.math.MathHelper
-import dev.xdark.clientapi.opengl.GlStateManager
 import dev.xdark.feder.NetUtil
 import io.netty.buffer.Unpooled
 import org.lwjgl.input.Keyboard
 import ru.cristalix.uiengine.UIEngine
 import ru.cristalix.uiengine.element.AbstractElement
-import ru.cristalix.uiengine.element.AnimationContext
 import ru.cristalix.uiengine.element.RectangleElement
-import ru.cristalix.uiengine.element.TextElement
-import ru.cristalix.uiengine.utility.Color
-import ru.cristalix.uiengine.utility.Relative
-import ru.cristalix.uiengine.utility.rectangle
-import ru.cristalix.uiengine.utility.text
-import kotlin.math.absoluteValue
+import ru.cristalix.uiengine.utility.*
 import kotlin.math.acos
 import kotlin.math.asin
 
-class CheatsMod: ModMain {
+class CheatsMod: KotlinMod() {
 
     lateinit var ui: RectangleElement
-
 
     val functions = mapOf(
 //        "akb" to "AntiKnockBack",
@@ -51,14 +39,14 @@ class CheatsMod: ModMain {
     val using = ArrayList<String>()
     val rgb = ArrayList<AbstractElement>()
 
-    override fun load(clientApi: ClientApi) {
-        UIEngine.initialize(clientApi)
+    override fun onEnable() {
+        UIEngine.initialize(this)
 
         UIEngine.overlayContext.addChild(text {
-            origin = Relative.TOP
-            align = Relative.TOP
+            origin = TOP
+            align = TOP
             offset.y = 3.0
-            content = "Меню чита включается на ё"
+            content = "Меню чита включается на ё б а н н ы й с ы р"
             shadow = true
             rgb.add(this)
         })
@@ -73,13 +61,13 @@ class CheatsMod: ModMain {
                     offset.y = 3.0 + 14.0 * i
                     addChild(text {
                         content = e.value
-                        origin = Relative.CENTER
-                        align = Relative.CENTER
+                        origin = CENTER
+                        align = CENTER
                         shadow = true
                         rgb.add(this)
                     })
                     size.x = children[0].size.x + 6.0
-                    onClick = { el, b, d ->
+                    onClick = { _, b, _ ->
 
                         if (b) {
                             val buffer = Unpooled.buffer()
@@ -103,7 +91,7 @@ class CheatsMod: ModMain {
 
         UIEngine.overlayContext.addChild(ui)
 
-        UIEngine.registerHandler(PlayerJump::class.java) {
+        registerHandler<PlayerJump> {
             if (using.contains("longjump")) {
                 val yaw = player.rotationYaw / 180f * Math.PI.toFloat()
                 val cos = MathHelper.cos(yaw).toDouble()
@@ -116,18 +104,18 @@ class CheatsMod: ModMain {
             }
         }
 
-        UIEngine.registerHandler(ChatSend::class.java) {
+        registerHandler<ChatSend> {
             message = message.replace("/ban", "/fakeban").replace("/mute", "/fakemute")
                 .replace("/galert", "/fakegalert")
         }
 
-        UIEngine.registerHandler(GameLoop::class.java) {
+        registerHandler<GameLoop> {
             clientApi.minecraft().player.setNoGravity(using.contains("nogravity"))
         }
 
         val entities = ArrayList<EntityPlayer>()
 
-        UIEngine.registerHandler(RenderTickPre::class.java) {
+        registerHandler<RenderTickPre> {
 
             val percent = (System.currentTimeMillis() % 10000) / 10000.0
             val step = (percent * 6).toInt()
@@ -146,7 +134,7 @@ class CheatsMod: ModMain {
             entities.clear()
         }
 
-        UIEngine.registerHandler(NameTemplateRender::class.java) {
+        registerHandler<NameTemplateRender> {
             if (entity is EntityPlayer) entities.add(entity as EntityPlayer)
         }
 
@@ -157,7 +145,7 @@ class CheatsMod: ModMain {
             (other.y - player.y) * (other.y - player.y) +
             (other.z - player.z) * (other.z - player.z)
 
-        UIEngine.registerHandler(GuiOverlayRender::class.java) {
+        registerHandler<GuiOverlayRender> {
 
             if (!using.contains("aim")) return@registerHandler
             val nearest = entities.minByOrNull { distSq(it) }
@@ -183,7 +171,7 @@ class CheatsMod: ModMain {
 //            clientApi.fontRenderer().drawString("${(asin(dx) * 180.0 / Math.PI).toInt()} ${(-acos(dz) * 180.0 / Math.PI).toInt()}", 100.0f, 2.0f, -1, true)
         }
 
-        UIEngine.registerHandler(KeyPress::class.java) {
+        registerHandler<KeyPress> {
             if (key == Keyboard.KEY_GRAVE) {
                 ui.enabled = !ui.enabled
                 if (ui.enabled) {
@@ -194,10 +182,6 @@ class CheatsMod: ModMain {
             }
         }
 
-    }
-
-    override fun unload() {
-        UIEngine.uninitialize()
     }
 
 

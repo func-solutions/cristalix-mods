@@ -62,10 +62,10 @@ class IndicatorsMod : ModMain {
             if (entity !is EntityLivingBase) return@a
             val entity = entity as EntityLivingBase
 
-            if (entity !is EntityPlayer) isCancelled = true
+//            if (entity !is EntityPlayer) isCancelled = true
 
             val part = entity.health / entity.maxHealth
-//            if (part == 1f) return@a
+            if (part == 1f) return@a
 
             val partialTicks = clientApi.minecraft().timer.renderPartialTicks
 
@@ -101,14 +101,10 @@ class IndicatorsMod : ModMain {
 
         }
 
-        UIEngine.registerHandler(KeyPress::class.java) {
-            if (key == Keyboard.KEY_PAUSE) UIEngine.uninitialize()
-        }
+//        UIEngine.registerHandler(KeyPress::class.java) {
+//            if (key == Keyboard.KEY_PAUSE) UIEngine.uninitialize()
+//        }
 
-        UIEngine.registerHandler(GameLoop::class.java) {
-            val c = clientApi.minecraft().player.openContainer
-            clientApi.chat().printChatMessage(if (c != null) "${c.windowId}" else "nope")
-        }
 
     }
 

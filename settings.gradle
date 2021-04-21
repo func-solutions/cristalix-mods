@@ -9,4 +9,7 @@ include 'mod-armor-hud',
         'mod-holograms',
         'mod-inventory-notifications',
         'mod-resourcepack-viewer',
-        'mod-cheats'
+        'mod-cheats',
+        'mod-staff-tools',
+        'mod-client-crash',
+        'mod-cosmetics'

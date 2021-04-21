@@ -1,0 +1,8 @@
+plugins {
+    id 'org.jetbrains.kotlin.plugin.serialization' version '1.4.30'
+}
+
+bundler {
+    mainClass 'ru.cristalix.stafftools.StaffToolsMod'
+}
+

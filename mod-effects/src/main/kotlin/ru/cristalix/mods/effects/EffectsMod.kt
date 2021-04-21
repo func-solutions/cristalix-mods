@@ -1,5 +1,6 @@
 package ru.cristalix.mods.effects
 
+import KotlinMod
 import dev.xdark.clientapi.ClientApi
 import dev.xdark.clientapi.entry.ModMain
 import dev.xdark.clientapi.event.input.KeyPress
@@ -16,17 +17,20 @@ import dev.xdark.clientapi.util.EnumHand
 import dev.xdark.feder.NetUtil
 import org.lwjgl.input.Keyboard
 import org.lwjgl.opengl.GL11
+import ru.cristalix.clientapi.JavaMod
 import ru.cristalix.uiengine.UIEngine
 import ru.cristalix.uiengine.element.*
 import ru.cristalix.uiengine.utility.*
 
-class EffectsMod : ModMain {
+class EffectsMod : KotlinMod() {
 
     lateinit var highlight: RectangleElement
     var highlightTask: Task? = null
 
-    override fun load(clientApi: ClientApi) {
-        UIEngine.initialize(clientApi)
+    val list = ArrayList<String>();
+
+    override fun onEnable() {
+        UIEngine.initialize(this)
         highlight = rectangle {
 
             val resolution = clientApi.resolution()
@@ -87,6 +91,8 @@ class EffectsMod : ModMain {
             highlight.size.y = resolution.scaledHeight_double
         }
 
+        list.add("123")
+
         UIEngine.overlayContext.addChild(highlight)
 
 
@@ -97,7 +103,7 @@ class EffectsMod : ModMain {
                 GlStateManager.disableDepth()
             }
             align = V3(0.5, 0.6)
-            origin = Relative.BOTTOM
+            origin = BOTTOM
             scale = V3(0.0, 0.0, 0.0)
             shadow = true
         }
@@ -108,9 +114,14 @@ class EffectsMod : ModMain {
             afterRender = {
                 GlStateManager.enableDepth()
             }
+            onClick = { _, _, _ ->
+
+                list.remove("123")
+
+            }
             offset.y = 1.0
-            origin = Relative.TOP
-            scale = V3(0.0, 0.0, 0.0)
+            origin = TOP
+//            scale = V3(0.0, 0.0, 0.0)
             shadow = true
         }
 
@@ -157,48 +168,44 @@ class EffectsMod : ModMain {
             }
         }, 1)
         
-//        UIEngine.registerHandler(KeyPress::class.java) {
-//
-//            when (key) {
-//                Keyboard.KEY_U -> {
-//                    clientApi.minecraft().player.swingArm(EnumHand.MAIN_HAND)
-//                }
-//
-//                Keyboard.KEY_J -> {
-//                    highlightTask?.cancelled = true
-//
-//                    highlight.animate(0.5, Easings.QUART_OUT) {
-//                        color.alpha = 0.65
-//                    }
-//
-//                    UIEngine.overlayContext.schedule(0.6) {
-//                        highlight.animate(0.4, Easings.QUART_OUT) {
-//                            color.alpha = 0.0
-//                        }
-//                    }
-//                }
-//
-//                Keyboard.KEY_K -> {
-//
-//                    clientApi.overlayRenderer().displayItemActivation(ItemStack.of(Item.of(378), 1, 0))
-//
-//                }
+        UIEngine.registerHandler(KeyPress::class.java) {
 
-//                Keyboard.KEY_PAUSE -> {
-//                    unload()
-//                }
-//            }
-//
-//
-//        }
+            when (key) {
+                Keyboard.KEY_U -> {
+                    clientApi.chat().printChatMessage(list.toString())
+                    clientApi.minecraft().player.swingArm(EnumHand.MAIN_HAND)
+                }
+
+                Keyboard.KEY_J -> {
+                    highlightTask?.cancelled = true
+
+                    highlight.animate(0.5, Easings.QUART_OUT) {
+                        color.alpha = 0.65
+                    }
+
+                    UIEngine.overlayContext.schedule(0.6) {
+                        highlight.animate(0.4, Easings.QUART_OUT) {
+                            color.alpha = 0.0
+                        }
+                    }
+                }
+
+                Keyboard.KEY_K -> {
+
+                    clientApi.overlayRenderer().displayItemActivation(ItemStack.of(Item.of(54), 1, 0))
+
+                }
+
+                Keyboard.KEY_PAUSE -> {
+                    unload()
+                }
+            }
 
 
+        }
 
-    }
 
 
-    override fun unload() {
-        UIEngine.uninitialize()
     }
 
 }
