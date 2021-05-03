@@ -1,0 +1,3 @@
+bundler {
+    mainClass 'ru.cristalix.mods.roulette.RouletteMod'
+}

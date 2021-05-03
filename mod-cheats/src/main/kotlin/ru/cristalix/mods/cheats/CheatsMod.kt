@@ -51,6 +51,36 @@ class CheatsMod: KotlinMod() {
             rgb.add(this)
         })
 
+        val body = rectangle {
+            offset = V3(10.0, 10.0)
+            UIEngine.overlayContext.addChild(this)
+        }
+
+        val b = rectangle {
+            color = BLACK
+            size = V3(100.0, 50.0)
+        }
+
+        UIEngine.overlayContext.addChild(b)
+
+        loop()
+        registerHandler<KeyPress> {
+            if (key == Keyboard.KEY_Y) {
+                UIEngine.overlayContext.schedule(0.5) {
+                    body.color = WHITE
+                    UIEngine.overlayContext.schedule(0.5) {
+                        body.color = BLACK
+                        UIEngine.overlayContext.schedule(0.5) {
+                            body.color = WHITE
+                            UIEngine.overlayContext.schedule(0.5) {
+                                body.color = BLACK
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         ui = rectangle {
             enabled = false
             functions.entries.forEachIndexed { i, e ->
@@ -89,7 +119,7 @@ class CheatsMod: KotlinMod() {
             }
         }
 
-        UIEngine.overlayContext.addChild(ui)
+//        UIEngine.overlayContext.addChild(ui)
 
         registerHandler<PlayerJump> {
             if (using.contains("longjump")) {
@@ -184,5 +214,11 @@ class CheatsMod: KotlinMod() {
 
     }
 
+    fun loop() {
+        UIEngine.overlayContext.schedule(0.1) {
+            UIEngine.overlayContext.children[0].offset.x = Math.random() * 100.0
+            loop()
+        }
+    }
 
 }
