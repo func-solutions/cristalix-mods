@@ -1,3 +1,14 @@
+pluginManagement {
+    repositories {
+        mavenLocal()
+        gradlePluginPortal()
+        mavenCentral()
+        maven {
+            url "https://repo.implario.dev/public"
+        }
+    }
+}
+
 rootProject.name = 'cristalix-mods'
 
 include 'mod-armor-hud',
@@ -12,4 +23,5 @@ include 'mod-armor-hud',
         'mod-cheats',
         'mod-staff-tools',
         'mod-client-crash',
-        'mod-cosmetics'
+        'mod-cosmetics',
+        'mod-roulette'

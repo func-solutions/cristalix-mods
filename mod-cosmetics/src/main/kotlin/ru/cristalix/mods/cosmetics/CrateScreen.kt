@@ -244,8 +244,13 @@ class CrateScreen {
 
         addChild(body2)
 
-        UIEngine.overlayContext.addChild(this, vignette, rarityText, nameText)
 
+    }
+
+    val screen = rectangle {
+        size = UIEngine.overlayContext.size
+        addChild(perspective, vignette, rarityText, nameText)
+        UIEngine.overlayContext.addChild(this)
     }
 
     fun setup(color: Color, rarity: String, item: ItemStack, name: String) {
@@ -317,10 +322,10 @@ class CrateScreen {
 
         UIEngine.overlayContext.schedule(1.5) {
             perspective.animate(1.2, Easings.QUART_BOTH) {
-                offset.x = -150.0
+                offset.x = -70.0
             }
-            UIEngine.overlayContext.animate(1.2, Easings.QUART_BOTH) {
-                offset.x = -150.0
+            screen.animate(1.2, Easings.QUART_BOTH) {
+                offset.x = -70.0
             }
         }
 

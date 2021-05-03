@@ -79,7 +79,7 @@ class CosmeticsMod : KotlinMod() {
             if (key == Keyboard.KEY_J) unload()
 
             if (key == Keyboard.KEY_K) {
-                crateScreen.perspective.enabled = false
+                CosmeticsScreen()
             }
             if (key == Keyboard.KEY_I) {
                 clientApi.minecraft().setIngameNotInFocus()
