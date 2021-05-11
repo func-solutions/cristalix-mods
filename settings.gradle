@@ -24,4 +24,6 @@ include 'mod-armor-hud',
         'mod-staff-tools',
         'mod-client-crash',
         'mod-cosmetics',
-        'mod-roulette'
+        'mod-roulette',
+        'mod-terminal',
+        'mod-view-terminal'

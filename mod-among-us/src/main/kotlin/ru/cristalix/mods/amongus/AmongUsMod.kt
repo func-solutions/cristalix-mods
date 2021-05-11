@@ -8,9 +8,8 @@ import dev.xdark.clientapi.event.render.GuiOverlayRender
 import dev.xdark.feder.NetUtil
 import org.lwjgl.opengl.GL11
 import ru.cristalix.uiengine.UIEngine
-import ru.cristalix.uiengine.element.RectangleElement
 import ru.cristalix.uiengine.utility.*
-import kotlin.math.PI
+import java.lang.Math.PI
 
 class AmongUsMod : ModMain {
 
@@ -48,7 +47,7 @@ class AmongUsMod : ModMain {
             }
         }
 
-//        createMinimap(miraHq)
+        createMinimap(miraHq)
     }
 
     private fun createMinimap(mapData: MapData) {
@@ -75,12 +74,14 @@ class AmongUsMod : ModMain {
                 size.y = 2.0
                 align = Relative.BOTTOM_RIGHT
             })
-            beforeRender = {
-                GL11.glDepthFunc(GL11.GL_EQUAL)
-            }
-            afterRender = {
-                GL11.glDepthFunc(GL11.GL_LEQUAL)
-            }
+//            beforeRender = {
+//                GL11.glDepthFunc(GL11.GL_EQUAL)
+//            }
+//            afterRender = {
+//                GL11.glDepthFunc(GL11.GL_LEQUAL)
+//            }
+
+            mask = true
 
             for (marker in mapData.markers) {
                 addChild(text {

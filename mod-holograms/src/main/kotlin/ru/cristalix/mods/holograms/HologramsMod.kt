@@ -102,49 +102,45 @@ class HologramsMod : KotlinMod() {
 //            }
 //        })
 
-//        val context3D = Context3D(V3(107.0, 100.0, 100.0))
-//        UIEngine.worldContexts.add(context3D)
-//
-//        repeat(5) {
-//            context3D.addChild(rectangle {
-//                size.x = it * 10.0
-//                size.y = 20.0
-//                offset.x = (it * it / 2.0 + 1) * 10.0
-//                color = ru.cristalix.uiengine.utility.Color(0, 0, 0, 0.5)
-//                beforeRender = {
-//                    GL11.glStencilMask(0xFF)
-//                    GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_INCR)
-//                    GL11.glStencilFunc(GL11.GL_LEQUAL, 128, 0xFF)
-//                }
-//            })
-//        }
-//
-//        UIEngine.registerHandler(PluginMessage::class.java) {
-//            if (channel == "wecui:wecui") {
-//                println("wecui: " + NetUtil.readUtf8(data))
-//            }
-//        }
-//
-//        context3D.addChild(rectangle {
-//            size.x = 40.0
-//            size.y = 40.0
-//            offset.x = 30.0
-//            origin = Relative.CENTER
-//            rotation.degrees = Math.PI / 3.0
-//            color = WHITE
-//            beforeRender = {
-//                GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_KEEP)
-//                GL11.glEnable(GL11.GL_STENCIL_TEST)
-//                GlStateManager.disableDepth()
-////                    GlStateManager.depthFunc(GL11.GL_EQUAL)
-//            }
-//            afterRender = {
-//                GlStateManager.enableDepth()
-////                GL11.glDisable(GL11.GL_STENCIL_TEST)
-//                GL11.glStencilFunc(GL11.GL_ALWAYS, 128, 0xFF)
-////                    GlStateManager.depthFunc(GL11.GL_LEQUAL)
-//            }
-//        })
+
+        val context3D = Context3D(V3(107.0, 100.0, 100.0))
+        UIEngine.worldContexts.add(context3D)
+
+        repeat(5) {
+            context3D.addChild(rectangle {
+                size.x = it * 10.0
+                size.y = 20.0
+                offset.x = (it * it / 2.0 + 1) * 10.0
+                color = ru.cristalix.uiengine.utility.Color(0, 0, 0, 0.5)
+                beforeRender = {
+                    GL11.glStencilMask(0xFF)
+                    GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_REPLACE)
+                    GL11.glStencilFunc(GL11.GL_ALWAYS, 128, 0xFF)
+                }
+            })
+        }
+
+        context3D.addChild(rectangle {
+            size.x = 40.0
+            size.y = 40.0
+            offset.x = 30.0
+            origin = Relative.CENTER
+            rotation.degrees = Math.PI / 3.0
+            color = WHITE
+            beforeRender = {
+                GL11.glStencilOp(GL11.GL_ZERO, GL11.GL_ZERO, GL11.GL_ZERO)
+                GL11.glEnable(GL11.GL_STENCIL_TEST)
+                GL11.glStencilFunc(GL11.GL_LESS, 128, 0xFF)
+                GlStateManager.disableDepth()
+//                    GlStateManager.depthFunc(GL11.GL_EQUAL)
+            }
+            afterRender = {
+                GlStateManager.enableDepth()
+                GL11.glDisable(GL11.GL_STENCIL_TEST)
+                GL11.glStencilFunc(GL11.GL_ALWAYS, 128, 0xFF)
+//                    GlStateManager.depthFunc(GL11.GL_LEQUAL)
+            }
+        })
 
 //        addHolo(UUID.randomUUID(), 0.0, 100.0, 0.0, "mcpatcher/cit/among_us/alert.png")
 

@@ -1,7 +1,7 @@
 plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.4.30'
     id 'org.hidetake.ssh' version '2.10.1'
-    id 'ru.cristalix.bundler' version '2.3.8-rc5' apply false
+    id 'ru.cristalix.bundler' version '3.0.0'
 }
 
 allprojects {
@@ -21,42 +21,19 @@ subprojects {
     apply plugin: 'kotlin'
     apply plugin: 'ru.cristalix.bundler'
 
-//    bundler {
-//        obfuscate = true
-//    }
-
-    bundle {
-        doFirst {
-//            whyareyoukeeping 'class kotlin.jvm.internal.Lambda {public java.lang.String toString();}'
-//            verbose()
-//            assumenosideeffects 'class kotlin.jvm.internal.Lambda {public java.lang.String toString();}'
-//            mergeinterfacesaggressively()
-//            optimizationpasses(1)
-        }
-    }
-
     dependencies {
 
         compileOnly 'ru.cristalix:client-api:latest-SNAPSHOT'
 
         implementation 'ru.cristalix:client-sdk:5.0.4'
-        implementation 'ru.cristalix:uiengine:3.7.5'
+        implementation 'ru.cristalix:uiengine:3.7.7-rc1'
 
         implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.4.30'
     }
 
-//    configurations.all {
-//        resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
-//    }
-
     jar.from configurations.runtimeClasspath.collect(project.&zipTree)
 
-    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
-        kotlinOptions {
-            jvmTarget = "1.8"
-        }
-    }
-
+    compileKotlin['kotlinOptions'].jvmTarget = "1.8"
 
 }
 
