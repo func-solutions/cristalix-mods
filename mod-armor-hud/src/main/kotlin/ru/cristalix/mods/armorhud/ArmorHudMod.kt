@@ -1,110 +1,85 @@
 package ru.cristalix.mods.armorhud
 
 import com.google.gson.Gson
-import dev.xdark.clientapi.ClientApi
-import dev.xdark.clientapi.entry.ModMain
+import dev.xdark.clientapi.event.gui.ScreenDisplay
 import dev.xdark.clientapi.event.input.KeyPress
 import dev.xdark.clientapi.event.lifecycle.GameLoop
-import dev.xdark.clientapi.event.render.GuiOverlayRender
 import dev.xdark.clientapi.opengl.GlStateManager
 import org.lwjgl.input.Keyboard
 import org.lwjgl.input.Mouse
-import org.lwjgl.opengl.Display
-import org.lwjgl.opengl.GL11
+import ru.cristalix.clientapi.KotlinMod
 import ru.cristalix.uiengine.UIEngine
 import ru.cristalix.uiengine.element.*
 import ru.cristalix.uiengine.utility.*
-import java.lang.Double.max
 import java.lang.Exception
-import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Paths
-import kotlin.math.max
-import kotlin.math.min
 
-class ArmorHudMod : ModMain {
+class ArmorHudMod : KotlinMod() {
 
     var dragging: Boolean = false
-    var draggingX: Double = 0.0
-    var draggingY: Double = 0.0
+    var draggingPosition = V2()
     val gson = Gson()
 
-    fun getMouse(): V2 {
-        val resolution = UIEngine.clientApi.resolution()
-        val factor = resolution.scaleFactor
-        val mouseX = (Mouse.getX() / factor).toDouble()
-        val mouseY = ((Display.getHeight() - Mouse.getY()) / factor).toDouble()
-        return V2(mouseX, mouseY)
-    }
+    override fun onEnable() {
+        UIEngine.initialize(this)
 
-    override fun load(api: ClientApi) {
-        UIEngine.initialize(api)
-
-        UIEngine.registerHandler(KeyPress::class.java) {
-            if (key == Keyboard.KEY_PAUSE) UIEngine.uninitialize()
+        registerHandler<KeyPress> {
+            if (key == Keyboard.KEY_J) UIEngine.uninitialize()
         }
 
         val armorIndicators = rectangle {
             size = V3(50.0, 50.0)
-//            color = Color(0, 0, 0, 0.5)
-            onClick = onClick@{ _: AbstractElement, b: Boolean, _: MouseButton ->
+            onClick {
                 if (Mouse.isGrabbed()) return@onClick
-                dragging = b
-                if (b) {
-                    val mouse = getMouse()
-                    val resolution = api.resolution()
-                    draggingX = mouse.x - this.offset.x - this.align.x * resolution.scaledWidth_double + this.origin.x * this.size.x
-                    draggingY = mouse.y - this.offset.y - this.align.y * resolution.scaledHeight_double + this.origin.y * this.size.y
+                dragging = down
+                if (down) {
+                    draggingPosition = position
                 } else {
-                    saveSettigs(Settings(align.x, align.y, offset.x, offset.y, 1.0, "normal", true))
+                    saveSettings(Settings(align.x, align.y, offset.x, offset.y, 1.0, "normal", true))
                 }
+            }
+            beforeRender {
+                if (dragging) {
+                    val resolution = clientApi.resolution()
+                    val factor = resolution.scaleFactor
+                    val draggable = this
+
+                    val lastParent = draggable.lastParent ?: return@beforeRender
+
+                    val px = (lastParent.hoverPosition.x - draggingPosition.x) / (lastParent.size.x - draggable.size.x)
+                    val py = (lastParent.hoverPosition.y - draggingPosition.y) / (lastParent.size.y - draggable.size.y)
+
+                    val alignX = when {
+                        px < 0.33 -> 0.0
+                        px > 0.66 -> 1.0
+                        else -> 0.5
+                    }
+                    val alignY = when {
+                        py < 0.33 -> 0.0
+                        py > 0.66 -> 1.0
+                        else -> 0.5
+                    }
+
+                    draggable.align = V3(alignX, alignY)
+                    draggable.origin = V3(alignX, alignY)
+                    draggable.offset.x =
+                        ((lastParent.hoverPosition.x - draggingPosition.x + (draggable.size.x - lastParent.size.x) * alignX)
+                            .coerceIn(-alignX * lastParent.size.x, (-alignX + 1) * lastParent.size.x) * factor).toInt().toDouble() /
+                                factor
+                    draggable.offset.y =
+                        ((lastParent.hoverPosition.y - draggingPosition.y + (draggable.size.y - lastParent.size.y) * alignY)
+                            .coerceIn(-alignY * lastParent.size.y, (-alignY + 1) * lastParent.size.y) * factor).toInt().toDouble() /
+                                factor
+
+
+                    if (!Mouse.isButtonDown(0)) dragging = false
+                }
+
             }
         }
 
-
-//        UIEngine.registerHandler(GuiOverlayRender::class.java, {
-//            api.fontRenderer().drawString("Offset: " + armorIndicators.offset.x.toString() + " " + armorIndicators.offset.y, 1f, 1f, -1, true)
-//            api.fontRenderer().drawString("Align: " + armorIndicators.align.x.toString() + " " + armorIndicators.align.y, 1f, 11f, -1, true)
-//            api.fontRenderer().drawString("Origin: " + armorIndicators.origin.x.toString() + " " + armorIndicators.origin.y, 1f, 21f, -1, true)
-//            api.fontRenderer().drawString("Dragging: $draggingX $draggingY", 1f, 31f, -1, true)
-//        })
-
-
-        UIEngine.registerHandler(GameLoop::class.java) {
-            if (dragging) {
-                val resolution = api.resolution()
-                val factor = resolution.scaleFactor
-                val mouse = getMouse()
-
-                val screenWidth = resolution.scaledWidth_double
-                val screenHeight = resolution.scaledHeight_double
-                val px = (mouse.x - draggingX) / (screenWidth - armorIndicators.size.x)
-                val py = (mouse.y - draggingY) / (screenHeight - armorIndicators.size.y)
-                val alignX = when {
-                    px < 0.33 -> 0.0
-                    px > 0.66 -> 1.0
-                    else -> 0.5
-                }
-                val alignY = when {
-                    py < 0.33 -> 0.0
-                    py > 0.66 -> 1.0
-                    else -> 0.5
-                }
-
-                armorIndicators.align = V3(alignX, alignY)
-                armorIndicators.origin = V3(alignX, alignY)
-                armorIndicators.offset.x =
-                    ((mouse.x - draggingX + (armorIndicators.size.x - screenWidth) * alignX)
-                        .coerceIn(-alignX * screenWidth, (-alignX + 1) * screenWidth) * factor).toInt().toDouble() /
-                            factor + if (alignX == 0.5) 0.5 else 0.0
-                armorIndicators.offset.y =
-                    ((mouse.y - draggingY + (armorIndicators.size.y - screenHeight) * alignY)
-                        .coerceIn(-alignY * screenHeight, (-alignY + 1) * screenHeight) * factor).toInt().toDouble() /
-                            factor + if (alignY == 0.5) 0.5 else 0.0
-
-
-                if (!Mouse.isButtonDown(0)) dragging = false
-            }
+        registerHandler<GameLoop> {
         }
 
 
@@ -118,7 +93,7 @@ class ArmorHudMod : ModMain {
 
                     addChild(
                         item {
-                            stack = api.itemRegistry().getItem(1).newStack(1, 1)
+                            stack = clientApi.itemRegistry().getItem(1).newStack(1, 1)
                         },
                         text {
                             beforeRender = {
@@ -133,10 +108,6 @@ class ArmorHudMod : ModMain {
                     )
                 }
             )
-        }
-
-        UIEngine.registerHandler(KeyPress::class.java) {
-            if (key == Keyboard.KEY_J) UIEngine.uninitialize()
         }
 
         val slotSize = 17.0
@@ -164,8 +135,8 @@ class ArmorHudMod : ModMain {
         }
 
 
-        UIEngine.registerHandler(GameLoop::class.java) {
-            val inventory = api.minecraft().player.inventory
+        registerHandler<GameLoop> {
+            val inventory = clientApi.minecraft().player.inventory
             var i = 0
             IntRange(36, 39).forEach {
                 val container = armorIndicators.children[3 - i] as RectangleElement
@@ -176,7 +147,7 @@ class ArmorHudMod : ModMain {
                 val textElement = container.children[1] as TextElement
                 textElement.content = if (stack.isDamageable) (percentage * 100).toInt().toString() + "%" else ""
                 textElement.color.green = (percentage * 2 * 255).toInt().coerceIn(150..255)
-                textElement.color.red = ((1-percentage) * 2 * 255).toInt().coerceIn(150..255)
+                textElement.color.red = ((1 - percentage) * 2 * 255).toInt().coerceIn(150..255)
                 textElement.color.blue = 150
                 i++
             }
@@ -189,7 +160,7 @@ class ArmorHudMod : ModMain {
         )
     }
 
-    private fun saveSettigs(settings: Settings) {
+    private fun saveSettings(settings: Settings) {
         try {
             Files.write(Paths.get("armorhud.json"), gson.toJson(settings).toByteArray());
         } catch (ex: Exception) {
@@ -207,7 +178,4 @@ class ArmorHudMod : ModMain {
         }
     }
 
-    override fun unload() {
-        UIEngine.uninitialize()
-    }
 }
