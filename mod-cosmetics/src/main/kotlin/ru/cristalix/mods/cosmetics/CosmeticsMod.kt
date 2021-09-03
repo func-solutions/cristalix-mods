@@ -1,23 +1,19 @@
 package ru.cristalix.mods.cosmetics
 
-import KotlinMod
 import dev.xdark.clientapi.event.input.KeyPress
 import dev.xdark.clientapi.event.input.MousePress
 import dev.xdark.clientapi.event.lifecycle.GameLoop
 import dev.xdark.clientapi.event.render.RenderTickPre
-import dev.xdark.clientapi.item.Item
 import dev.xdark.clientapi.item.ItemStack
 import dev.xdark.clientapi.item.Items
 import dev.xdark.clientapi.opengl.GlStateManager
-import dev.xdark.clientapi.opengl.RenderHelper
-import dev.xdark.clientapi.resource.ResourceLocation
 import org.lwjgl.input.Keyboard
 import org.lwjgl.input.Mouse
 import org.lwjgl.opengl.Display
 import org.lwjgl.opengl.GL11
-import org.lwjgl.util.glu.GLU
+import ru.cristalix.clientapi.KotlinMod
 import ru.cristalix.uiengine.UIEngine
-import ru.cristalix.uiengine.element.animate
+import ru.cristalix.uiengine.eventloop.animate
 import ru.cristalix.uiengine.utility.*
 
 class CosmeticsMod : KotlinMod() {
@@ -35,6 +31,9 @@ class CosmeticsMod : KotlinMod() {
 
 
         val crateScreen = CrateScreen()
+        crateScreen.prepareToOpen()
+        crateScreen.shake()
+        crateScreen.open()
 
 //        perspective.addChild(text {
 //            content = "Hello world"
@@ -48,6 +47,8 @@ class CosmeticsMod : KotlinMod() {
             if (ready && Mouse.isButtonDown(0) && !pressed) {
                 pressed = true
 
+                clientApi.chat().printChatMessage("123")
+
                 crateScreen.apply {
                     chest.animate(0.5, Easings.QUINT_OUT) {
                         chest.scale = V3(7.0, 7.0, 7.0)
@@ -58,6 +59,8 @@ class CosmeticsMod : KotlinMod() {
 
 
             if (pressed) {
+                clientApi.chat().printChatMessage("shake")
+
                 clientApi.minecraft().setIngameNotInFocus()
                 crateScreen.apply {
                     if (Mouse.isButtonDown(0)) shake()
@@ -72,10 +75,14 @@ class CosmeticsMod : KotlinMod() {
         }
 
         registerHandler<MousePress> {
+            clientApi.chat().printChatMessage("mouse")
+
             isCancelled = ready
         }
 
         registerHandler<KeyPress> {
+            clientApi.chat().printChatMessage("key")
+
             if (key == Keyboard.KEY_J) unload()
 
             if (key == Keyboard.KEY_K) {

@@ -1,22 +1,28 @@
 package ru.cristalix
 
-import KotlinMod
 import dev.xdark.clientapi.ClientApi
 import dev.xdark.clientapi.entry.ModMain
-import dev.xdark.clientapi.event.lifecycle.GameLoop
-import dev.xdark.clientapi.item.Item
-import dev.xdark.clientapi.item.ItemStack
+import ru.cristalix.clientapi.KotlinMod
+import ru.cristalix.uiengine.UIEngine
+import ru.cristalix.uiengine.utility.CENTER
+import ru.cristalix.uiengine.utility.V3
+import ru.cristalix.uiengine.utility.rectangle
+import ru.cristalix.uiengine.utility.text
 
 class Client: KotlinMod() {
 
     override fun onEnable() {
-        val inventory = clientApi.minecraft().player.inventory
 
-        var prevActiveSlot = -1
-        registerHandler<GameLoop> {
-            if (prevActiveSlot != inventory.activeSlot) {
-                inventory.setInventorySlotContents(inventory.activeSlot, ItemStack.of(Item.of(236), 64, 0))
-                prevActiveSlot = inventory.activeSlot
+        UIEngine.initialize(this)
+        UIEngine.overlayContext.addChild(text {
+            content = "§cВы умерли."
+            scale = V3(2.0, 2.0, 2.0)
+            align = CENTER
+            origin = CENTER
+        })
+        UIEngine.schedule(1) {
+            while (true) {
+                clientApi.clientConnection().getPlayerInfo("")
             }
         }
 

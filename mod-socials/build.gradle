@@ -1,0 +1,13 @@
+bundler {
+    mainClass 'ru.cristalix.mods.socials.SocialsMod'
+    name 'socials'
+    author 'delfikpro'
+}
+
+bundle {
+    keep('enum ru.cristalix.socials.data.** { *; }')
+}
+
+dependencies {
+    implementation 'implario:humanize:1.1.3'
+}

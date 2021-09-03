@@ -28,85 +28,131 @@ class ArmorHudMod : KotlinMod() {
             if (key == Keyboard.KEY_J) UIEngine.uninitialize()
         }
 
+        val listOf = listOf(
+                "hello",
+                "hello",
+                "hello",
+                "hello",
+                "hello",
+                "hello",
+                "hello",
+                "hello",
+                "hello",
+                "hello",
+                "hello",
+                "hello",
+                "hello",
+                "hello",
+                "hello",
+                "hello",
+                "hello",
+                "hello",
+                "hello",
+        )
+        val contextGui = ContextGui()
+        contextGui.apply {
+            onHover {}
+            afterRender {
+                screen.drawHoveringText(listOf, hoverPosition.x.toInt(), hoverPosition.y.toInt())
+            }
+        }
+
+        contextGui.open()
+
         val armorIndicators = rectangle {
             size = V3(50.0, 50.0)
+
+            val drag = DragHandler(
+                    this,
+                    stickToAligns = true,
+                    snapToResolution = true,
+                    allowOverflow = false
+            )
+
             onClick {
-                if (Mouse.isGrabbed()) return@onClick
-                dragging = down
-                if (down) {
-                    draggingPosition = position
-                } else {
-                    saveSettings(Settings(align.x, align.y, offset.x, offset.y, 1.0, "normal", true))
-                }
+                drag.dragging = down
             }
+
             beforeRender {
-                if (dragging) {
-                    val resolution = clientApi.resolution()
-                    val factor = resolution.scaleFactor
-                    val draggable = this
+                drag.update()
+                if (!Mouse.isButtonDown(0)) drag.dragging = false
+            }
 
-                    val lastParent = draggable.lastParent ?: return@beforeRender
+        }
 
-                    val px = (lastParent.hoverPosition.x - draggingPosition.x) / (lastParent.size.x - draggable.size.x)
-                    val py = (lastParent.hoverPosition.y - draggingPosition.y) / (lastParent.size.y - draggable.size.y)
+        val slider = rectangle {
+            align = CENTER
+            size.x = 300.0
+            size.y = 4.0
+            origin = CENTER
 
-                    val alignX = when {
-                        px < 0.33 -> 0.0
-                        px > 0.66 -> 1.0
-                        else -> 0.5
-                    }
-                    val alignY = when {
-                        py < 0.33 -> 0.0
-                        py > 0.66 -> 1.0
-                        else -> 0.5
-                    }
+            color.alpha = 0.5
 
-                    draggable.align = V3(alignX, alignY)
-                    draggable.origin = V3(alignX, alignY)
-                    draggable.offset.x =
-                        ((lastParent.hoverPosition.x - draggingPosition.x + (draggable.size.x - lastParent.size.x) * alignX)
-                            .coerceIn(-alignX * lastParent.size.x, (-alignX + 1) * lastParent.size.x) * factor).toInt().toDouble() /
-                                factor
-                    draggable.offset.y =
-                        ((lastParent.hoverPosition.y - draggingPosition.y + (draggable.size.y - lastParent.size.y) * alignY)
-                            .coerceIn(-alignY * lastParent.size.y, (-alignY + 1) * lastParent.size.y) * factor).toInt().toDouble() /
-                                factor
+            addChild(rectangle {
 
+                val drag = DragHandler(this, stickToAligns = false)
+                size = V3(0.0, 4.0)
+                origin = CENTER
+                align = LEFT
 
-                    if (!Mouse.isButtonDown(0)) dragging = false
+                beforeRender {
+                    drag.update()
+                    if (!Mouse.isButtonDown(0)) drag.dragging = false
                 }
 
-            }
+                addChild(rectangle {
+                    size = V3(12.0, 12.0)
+                    color = WHITE
+                    color.alpha = 0.5
+                    origin = CENTER
+                    align = CENTER
+
+                    onClick {
+                        drag.dragging = down
+                    }
+
+                    addChild(text {
+                        beforeRender {
+                            content = drag.element.offset.x.toString()
+                        }
+                        origin = BOTTOM
+                        align = TOP
+                        shadow = true
+                        offset.y = -1.0
+                    })
+                })
+
+
+            })
+
         }
 
-        registerHandler<GameLoop> {
-        }
-
+        UIEngine.overlayContext.addChild(slider)
 
         UIEngine.overlayContext.addChild(armorIndicators)
 
         repeat(4) {
             armorIndicators.children.add(
-                rectangle {
-                    size = V3(16.0, 16.0)
-                    color = TRANSPARENT
+                    rectangle {
+                        size = V3(16.0, 16.0)
+                        color = TRANSPARENT
 
-                    addChild(
-                        item {
-                            stack = clientApi.itemRegistry().getItem(1).newStack(1, 1)
-                        },
-                        text {
-                            beforeRender = {
-                                GlStateManager.disableDepth()
-                            }
-                            afterRender = {
-                                GlStateManager.enableDepth()
-                            }
-                            offset = V3(19.0, 3.0, -1.0)
-                            shadow = true
-                        }
-                    )
-                }
+                        addChild(
+                                item {
+                                    stack = clientApi.itemRegistry().getItem(1).newStack(1, 1)
+                                },
+                                text {
+                                    beforeRender = {
+                                        GlStateManager.disableDepth()
+                                    }
+                                    afterRender = {
+                                        GlStateManager.enableDepth()
+                                    }
+                                    offset = V3(19.0, 3.0, -1.0)
+                                    shadow = true
+                                }
+                        )
+                    }
             )
         }
 
@@ -124,8 +170,8 @@ class ArmorHudMod : KotlinMod() {
             armorIndicators.scale = V3(settings.scale, settings.scale, 1.0)
 
             armorIndicators.size = V3(
-                if (settings.vertical) slotSize + 10 else slotSize * 4 + 10,
-                if (settings.vertical) slotSize * 4 + 10 else slotSize + 10,
+                    if (settings.vertical) slotSize + 10 else slotSize * 4 + 10,
+                    if (settings.vertical) slotSize * 4 + 10 else slotSize + 10,
             )
 
             for ((i, child) in armorIndicators.children.withIndex()) {
@@ -142,7 +188,7 @@ class ArmorHudMod : KotlinMod() {
                 val container = armorIndicators.children[3 - i] as RectangleElement
                 val stack = inventory.getStackInSlot(it)
                 (container.children[0] as ItemElement).stack =
-                    stack
+                        stack
                 val percentage = 1.0 - stack.itemDamage.toDouble() / stack.maxDamage
                 val textElement = container.children[1] as TextElement
                 textElement.content = if (stack.isDamageable) (percentage * 100).toInt().toString() + "%" else ""
@@ -154,9 +200,9 @@ class ArmorHudMod : KotlinMod() {
         }
 
         reload(
-            readSettings() ?: Settings(
-                1.0, 0.0, -60.0, 0.0, 1.0, "", true
-            )
+                readSettings() ?: Settings(
+                        1.0, 0.0, -60.0, 0.0, 1.0, "", true
+                )
         )
     }
 

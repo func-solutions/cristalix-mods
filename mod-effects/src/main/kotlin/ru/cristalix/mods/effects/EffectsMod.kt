@@ -1,33 +1,28 @@
 package ru.cristalix.mods.effects
 
-import KotlinMod
-import dev.xdark.clientapi.ClientApi
-import dev.xdark.clientapi.entry.ModMain
 import dev.xdark.clientapi.event.input.KeyPress
-import dev.xdark.clientapi.event.network.PluginMessage
 import dev.xdark.clientapi.event.render.ScaleChange
 import dev.xdark.clientapi.event.window.WindowResize
 import dev.xdark.clientapi.item.Item
 import dev.xdark.clientapi.item.ItemStack
 import dev.xdark.clientapi.item.ItemTools
 import dev.xdark.clientapi.opengl.GlStateManager
-import dev.xdark.clientapi.opengl.RenderHelper
-import dev.xdark.clientapi.render.DefaultVertexFormats
+import dev.xdark.clientapi.resource.ResourceLocation
 import dev.xdark.clientapi.util.EnumHand
-import dev.xdark.feder.NetUtil
 import org.lwjgl.input.Keyboard
 import org.lwjgl.opengl.GL11
-import ru.cristalix.clientapi.JavaMod
+import ru.cristalix.clientapi.KotlinMod
+import ru.cristalix.clientapi.readUtf8
 import ru.cristalix.uiengine.UIEngine
-import ru.cristalix.uiengine.element.*
+import ru.cristalix.uiengine.element.RectangleElement
+import ru.cristalix.uiengine.eventloop.Task
+import ru.cristalix.uiengine.eventloop.animate
 import ru.cristalix.uiengine.utility.*
 
 class EffectsMod : KotlinMod() {
 
     lateinit var highlight: RectangleElement
     var highlightTask: Task? = null
-
-    val list = ArrayList<String>();
 
     override fun onEnable() {
         UIEngine.initialize(this)
@@ -39,7 +34,7 @@ class EffectsMod : KotlinMod() {
 
             color = Color(60, 255, 60, 0.0)
 
-            textureLocation = clientApi.resourceManager().getLocation("minecraft", "textures/misc/vignette.png")
+            textureLocation = ResourceLocation.of("minecraft", "textures/misc/vignette.png")
 
             beforeRender = {
                 GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE)
@@ -82,24 +77,22 @@ class EffectsMod : KotlinMod() {
 //        ctx.addChild(cube)
 //        UIEngine.worldContexts.add(ctx)
 
-        UIEngine.registerHandler(ScaleChange::class.java) {
+        registerHandler<ScaleChange> {
             highlight.size.x = clientApi.resolution().scaledWidth_double
             highlight.size.y = clientApi.resolution().scaledHeight_double
         }
-        UIEngine.registerHandler(WindowResize::class.java) {
+        registerHandler<WindowResize> {
             highlight.size.x = resolution.scaledWidth_double
             highlight.size.y = resolution.scaledHeight_double
         }
-
-        list.add("123")
 
         UIEngine.overlayContext.addChild(highlight)
 
 
         val title = text {
-            content = "§7???"
+            content = ""
 //            offset.z = -172.0
-            beforeRender = {
+            beforeRender {
                 GlStateManager.disableDepth()
             }
             align = V3(0.5, 0.6)
@@ -108,102 +101,90 @@ class EffectsMod : KotlinMod() {
             shadow = true
         }
         val subtitle = text {
-            content = "§7???"
+            content = ""
 //            offset.z = -172.0
             align = V3(0.5, 0.6)
-            afterRender = {
+            afterRender {
                 GlStateManager.enableDepth()
-            }
-            onClick = { _, _, _ ->
-
-                list.remove("123")
-
             }
             offset.y = 1.0
             origin = TOP
-//            scale = V3(0.0, 0.0, 0.0)
+            scale = V3(0.0, 0.0, 0.0)
             shadow = true
         }
 
         UIEngine.overlayContext.addChild(title, subtitle)
 
 
-        val createListener = clientApi.messageBus().createListener()
-        clientApi.messageBus().register(createListener, PluginMessage::class.java, {
-            if (it.channel == "highlight") {
-                highlightTask?.cancelled = true
+        registerChannel("highlight") {
+            highlightTask?.cancelled = true
 
-                highlight.animate(0.5, Easings.QUART_OUT) {
-                    color.alpha = 0.65
-                }
-
-                UIEngine.overlayContext.schedule(0.6) {
-                    highlight.animate(0.4, Easings.QUART_OUT) {
-                        color.alpha = 0.0
-                    }
-                }
-            }
-            if (it.channel == "itemtitle") {
-                clientApi.overlayRenderer().displayItemActivation(ItemTools.read(it.data))
-                title.content = NetUtil.readUtf8(it.data)
-                subtitle.content = NetUtil.readUtf8(it.data)
-                title.animate(1.0, Easings.ELASTIC_OUT) {
-                    scale.x = 4.0
-                    scale.y = 4.0
-                }
-                subtitle.animate(0.5, Easings.ELASTIC_OUT) {
-                    scale.x = 2.0
-                    scale.y = 2.0
-                }
-                UIEngine.overlayContext.schedule(2) {
-                    title.animate(0.25) {
-                        scale.x = 0.0
-                        scale.y = 0.0
-                    }
-                    subtitle.animate(0.25) {
-                        scale.x = 0.0
-                        scale.y = 0.0
-                    }
-                }
-            }
-        }, 1)
-        
-        UIEngine.registerHandler(KeyPress::class.java) {
-
-            when (key) {
-                Keyboard.KEY_U -> {
-                    clientApi.chat().printChatMessage(list.toString())
-                    clientApi.minecraft().player.swingArm(EnumHand.MAIN_HAND)
-                }
-
-                Keyboard.KEY_J -> {
-                    highlightTask?.cancelled = true
-
-                    highlight.animate(0.5, Easings.QUART_OUT) {
-                        color.alpha = 0.65
-                    }
-
-                    UIEngine.overlayContext.schedule(0.6) {
-                        highlight.animate(0.4, Easings.QUART_OUT) {
-                            color.alpha = 0.0
-                        }
-                    }
-                }
-
-                Keyboard.KEY_K -> {
-
-                    clientApi.overlayRenderer().displayItemActivation(ItemStack.of(Item.of(54), 1, 0))
-
-                }
-
-                Keyboard.KEY_PAUSE -> {
-                    unload()
-                }
+            highlight.animate(0.5, Easings.QUART_OUT) {
+                color.alpha = 0.65
             }
 
-
+            UIEngine.schedule(0.6) {
+                highlight.animate(0.4, Easings.QUART_OUT) {
+                    color.alpha = 0.0
+                }
+            }
         }
 
+        registerChannel("itemtitle") {
+
+            clientApi.overlayRenderer().displayItemActivation(ItemTools.read(this))
+            title.content = readUtf8()
+            subtitle.content = readUtf8()
+            title.animate(1.0, Easings.ELASTIC_OUT) {
+                scale.x = 4.0
+                scale.y = 4.0
+            }
+            subtitle.animate(0.5, Easings.ELASTIC_OUT) {
+                scale.x = 2.0
+                scale.y = 2.0
+            }
+            UIEngine.schedule(2) {
+                title.animate(0.25) {
+                    scale.x = 0.0
+                    scale.y = 0.0
+                }
+                subtitle.animate(0.25) {
+                    scale.x = 0.0
+                    scale.y = 0.0
+                }
+            }
+        }
+
+//        registerHandler<KeyPress> {
+//            when (key) {
+//
+//                Keyboard.KEY_J -> {
+//                    highlightTask?.cancelled = true
+//
+//                    highlight.animate(0.5, Easings.QUART_OUT) {
+//                        color.alpha = 0.65
+//                    }
+//
+//                    UIEngine.schedule(0.6) {
+//                        highlight.animate(0.4, Easings.QUART_OUT) {
+//                            color.alpha = 0.0
+//                        }
+//                    }
+//                }
+//
+//                Keyboard.KEY_K -> {
+//
+//                    clientApi.overlayRenderer().displayItemActivation(ItemStack.of(Item.of(54), 1, 0))
+//
+//                }
+//
+//                Keyboard.KEY_PAUSE -> {
+//                    unload()
+//                }
+//            }
+//
+//
+//        }
 
 
     }

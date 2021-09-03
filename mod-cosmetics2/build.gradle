@@ -1,0 +1,4 @@
+
+bundler {
+    mainClass 'ru.cristalix.mods.cosmetics.CosmeticsMod'
+}

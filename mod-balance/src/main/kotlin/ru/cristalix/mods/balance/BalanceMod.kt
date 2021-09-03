@@ -1,26 +1,50 @@
 package ru.cristalix.mods.balance
 
-import dev.xdark.clientapi.ClientApi
 import dev.xdark.clientapi.entry.ModMain
 import dev.xdark.clientapi.event.input.KeyPress
 import dev.xdark.clientapi.event.network.PluginMessage
 import org.lwjgl.input.Keyboard.KEY_J
+import ru.cristalix.clientapi.KotlinMod
 import ru.cristalix.uiengine.UIEngine
 import ru.cristalix.uiengine.element.RectangleElement
 import ru.cristalix.uiengine.element.TextElement
-import ru.cristalix.uiengine.element.animate
+import ru.cristalix.uiengine.eventloop.animate
 import ru.cristalix.uiengine.utility.*
 import kotlin.math.absoluteValue
 
-class BalanceMod : ModMain {
+fun commas(n: Double): String {
+    var newStr = ""
+    var digits = -1
+//    val ss = n.toInt().toString().split('.')
+    val str = n.toInt().toString()
+    val d1 = (n - n.toInt()).toFloat()
+    var d = "$d1"
+    if (d.indexOf('.') >= 0) d = d.substring(d.indexOf('.') + 1)
 
+    str.reversed().forEach {
+        if (it == '-') newStr = "-$newStr"
+        else {
+            newStr = it + if (digits++ == 2) ",$newStr" else "" + newStr
+            if (digits == 3) digits = 0
+        }
+    }
+
+    if (newStr.isEmpty()) newStr = "0"
+
+
+    return if (d1 < 0.0001) newStr else "$newStr.$d"
+}
+
+
+class BalanceMod : KotlinMod() {
     private var balance = 0.0
+
     private lateinit var balanceText: TextElement
 
     private lateinit var box: RectangleElement
 
-    override fun load(clientApi: ClientApi) {
-        UIEngine.initialize(clientApi)
+    override fun onEnable() {
+        UIEngine.initialize(this)
 
         balanceText = text {
             content = pretty()
@@ -37,41 +61,26 @@ class BalanceMod : ModMain {
 
         UIEngine.overlayContext.addChild(box)
 
-        clientApi.messageBus().register(clientApi.messageBus().createListener(), PluginMessage::class.java, {
-            if (it.channel == "balance") {
-                val newBalance = it.data.readDouble()
-                addBalance(newBalance - balance)
-                balance = newBalance
-                balanceText.content = pretty()
-            }
-        }, 1)
-
-//        UIEngine.registerHandler(KeyPress::class.java, {
+        registerChannel("balance") {
+            val newBalance = readDouble()
+            addBalance(newBalance - balance)
+            balance = newBalance
+            balanceText.content = pretty()
+        }
+//        registerHandler<KeyPress> {
 //            if (key == KEY_J) {
-//                val change = Math.random() * 8374587 - 4000000
-//                addBalance(change)
+//                val change = (Math.random() * 80374587 - 4000000).toInt()
+//                addBalance(change.toDouble())
 //                balance += change
 //                balanceText.content = pretty()
 //            }
-//        })
+//        }
 
 
     }
+
 
     private fun pretty(balance: Double = this.balance) = "Баланс §8» §6${commas(balance)}"
-
-    private fun commas(n: Double): String {
-        var newStr = ""
-        var digits = -1
-        val ss = n.toString().split('.')
-        val str = ss[0]
-
-        str.reversed().forEach {
-            newStr = it + if (digits++ == 2) ",$newStr" else "" + newStr
-            if (digits == 3) digits = 0
-        }
-        return if (ss.size < 2) newStr else (newStr + '.' + ss[1])
-    }
 
     private fun addBalance(balance: Double) {
         val sign = if (balance < 0) "-" else "+"
@@ -86,7 +95,7 @@ class BalanceMod : ModMain {
             offset.y = -3.0
         }
 
-        UIEngine.overlayContext.schedule(0.1) {
+        UIEngine.schedule(0.1) {
             balanceText.animate(0.4, Easings.BACK_OUT) {
                 offset.y = 0.0
             }
@@ -100,13 +109,10 @@ class BalanceMod : ModMain {
             color.alpha = 0.0
         }
 
-        UIEngine.overlayContext.schedule(0.5) {
+        UIEngine.schedule(0.5) {
             box.removeChild(text)
         }
 
     }
 
-    override fun unload() {
-        UIEngine.uninitialize()
-    }
 }

@@ -1,6 +1,7 @@
 package ru.cristalix.mods.indicators
 
 import dev.xdark.clientapi.ClientApi
+import dev.xdark.clientapi.entity.EntityArmorStand
 import dev.xdark.clientapi.entity.EntityLivingBase
 import dev.xdark.clientapi.entity.EntityPlayer
 import dev.xdark.clientapi.entry.ModMain
@@ -13,15 +14,16 @@ import org.lwjgl.input.Keyboard
 import org.lwjgl.opengl.GL11
 import org.lwjgl.util.vector.Matrix4f
 import org.lwjgl.util.vector.Vector3f
+import ru.cristalix.clientapi.KotlinMod
 import ru.cristalix.uiengine.UIEngine
 import ru.cristalix.uiengine.element.Context3D
 import ru.cristalix.uiengine.utility.*
 
 
-class IndicatorsMod : ModMain {
+class IndicatorsMod : KotlinMod() {
 
-    override fun load(clientApi: ClientApi) {
-        UIEngine.initialize(clientApi)
+    override fun onEnable() {
+        UIEngine.initialize(this)
 
         val context = Context3D(V3())
 //        val caption = text {
@@ -49,7 +51,7 @@ class IndicatorsMod : ModMain {
 
         context.addChild(body)
 
-        UIEngine.registerHandler(RenderTickPre::class.java) {
+        registerHandler<RenderTickPre> {
             val player = clientApi.minecraft().player
             val matrix = Matrix4f()
             Matrix4f.setIdentity(matrix)
@@ -58,14 +60,14 @@ class IndicatorsMod : ModMain {
             context.matrices[rotationMatrix] = matrix
         }
 
-        UIEngine.registerHandler(NameTemplateRender::class.java) a@{
-            if (entity !is EntityLivingBase) return@a
+        registerHandler<NameTemplateRender> {
+            if (entity !is EntityLivingBase) return@registerHandler
             val entity = entity as EntityLivingBase
 
-//            if (entity !is EntityPlayer) isCancelled = true
+            if (entity !is EntityPlayer && entity !is EntityArmorStand) isCancelled = true
 
             val part = entity.health / entity.maxHealth
-            if (part == 1f) return@a
+            if (part == 1f) return@registerHandler
 
             val partialTicks = clientApi.minecraft().timer.renderPartialTicks
 
@@ -106,10 +108,6 @@ class IndicatorsMod : ModMain {
 //        }
 
 
-    }
-
-    override fun unload() {
-        UIEngine.uninitialize()
     }
 
 }

@@ -1,0 +1,17 @@
+bundler {
+    mainClass 'ru.cristalix.mods.NiceChatMod'
+    author 'delfikpro'
+    version '1.0'
+    name 'NiceChat'
+    clientMod = true
+}
+
+task moveToModsDir(type: Copy) {
+    group 'build'
+    dependsOn build
+    from jar.archiveFile.get().asFile.path.replace('-raw', '-bundle')
+    def dataDir = System.getenv("APPDATA") ?: System.getProperty("user.home")
+    def modsDir = file "$dataDir/.cristalix/updates/Minigames/mods"
+    modsDir.mkdirs()
+    into modsDir
+}

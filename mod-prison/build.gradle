@@ -1,0 +1,6 @@
+bundler {
+    mainClass 'ru.cristalix.mods.prison.PrisonMod'
+    author 'delfikpro'
+    version '2.0'
+    name 'prison mod'
+}

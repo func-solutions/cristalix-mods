@@ -26,4 +26,14 @@ include 'mod-armor-hud',
         'mod-cosmetics',
         'mod-roulette',
         'mod-terminal',
-        'mod-view-terminal'
+        'mod-view-terminal',
+        'mod-antiflash',
+        'mod-glory',
+        'mod-nice-chat',
+        'mod-prison',
+        'mod-socials',
+//        'mod-cosmetics2',
+        'mod-metrics',
+        'mod-flappy-zabelov',
+        'mod-games5e'
+

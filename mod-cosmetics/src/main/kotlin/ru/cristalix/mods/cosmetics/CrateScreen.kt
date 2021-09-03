@@ -6,12 +6,14 @@ import dev.xdark.clientapi.item.ItemStack
 import dev.xdark.clientapi.opengl.GlStateManager
 import dev.xdark.clientapi.opengl.RenderHelper
 import dev.xdark.clientapi.resource.ResourceLocation
+import javafx.stage.Screen
 import org.lwjgl.opengl.GL11
 import org.lwjgl.util.glu.GLU
 import ru.cristalix.clientapi.JavaMod
 import ru.cristalix.uiengine.UIEngine
+import ru.cristalix.uiengine.element.ContextGui
 import ru.cristalix.uiengine.element.ItemElement
-import ru.cristalix.uiengine.element.animate
+import ru.cristalix.uiengine.eventloop.animate
 import ru.cristalix.uiengine.utility.*
 
 
@@ -247,10 +249,16 @@ class CrateScreen {
 
     }
 
-    val screen = rectangle {
-        size = UIEngine.overlayContext.size
-        addChild(perspective, vignette, rarityText, nameText)
-        UIEngine.overlayContext.addChild(this)
+    val screen = ContextGui(dev.xdark.clientapi.gui.Screen.Builder.builder()
+        .init {
+            prepareToOpen()
+            shake()
+            open()
+        })
+
+    init {
+        screen.addChild(perspective, vignette, rarityText, nameText)
+        screen.open()
     }
 
     fun setup(color: Color, rarity: String, item: ItemStack, name: String) {
@@ -283,7 +291,7 @@ class CrateScreen {
             wrapper.rotation.degrees = Math.PI + 0.4
         }
 
-        UIEngine.overlayContext.schedule(0.8) {
+        UIEngine.schedule(0.8) {
             wrapper.animate(0.4, Easings.BACK_OUT) {
                 wrapper.rotation.degrees = Math.PI
             }
@@ -320,7 +328,7 @@ class CrateScreen {
         itemRect.enabled = true
         itemRect.offset.y = 0.0
 
-        UIEngine.overlayContext.schedule(1.5) {
+        UIEngine.schedule(1.5) {
             perspective.animate(1.2, Easings.QUART_BOTH) {
                 offset.x = -70.0
             }
@@ -341,7 +349,7 @@ class CrateScreen {
             vignette.color.alpha = 0.8
         }
 
-        UIEngine.overlayContext.schedule(0.5) {
+        UIEngine.schedule(0.5) {
             vignette.animate(0.8, Easings.CUBIC_OUT) {
                 color.alpha = 0.0
             }

@@ -1,6 +1,5 @@
 package ru.cristalix.mods.cheats
 
-import KotlinMod
 import dev.xdark.clientapi.entity.EntityPlayer
 import dev.xdark.clientapi.event.chat.ChatSend
 import dev.xdark.clientapi.event.entity.PlayerJump
@@ -13,8 +12,10 @@ import dev.xdark.clientapi.math.MathHelper
 import dev.xdark.feder.NetUtil
 import io.netty.buffer.Unpooled
 import org.lwjgl.input.Keyboard
+import ru.cristalix.clientapi.KotlinMod
 import ru.cristalix.uiengine.UIEngine
 import ru.cristalix.uiengine.element.AbstractElement
+import ru.cristalix.uiengine.element.ContextGui
 import ru.cristalix.uiengine.element.RectangleElement
 import ru.cristalix.uiengine.utility.*
 import kotlin.math.acos
@@ -46,7 +47,7 @@ class CheatsMod: KotlinMod() {
             origin = TOP
             align = TOP
             offset.y = 3.0
-            content = "Меню чита включается на ё б а н н ы й с ы р"
+            content = "Меню чита включается на ё"
             shadow = true
             rgb.add(this)
         })
@@ -64,15 +65,25 @@ class CheatsMod: KotlinMod() {
         UIEngine.overlayContext.addChild(b)
 
         loop()
+
         registerHandler<KeyPress> {
+            if (key == Keyboard.KEY_K) {
+                val ctx = ContextGui()
+
+                ctx.addChild(rectangle {
+                    size = V3(100.0, 100.0)
+                    color = WHITE
+                })
+                ctx.open()
+            }
             if (key == Keyboard.KEY_Y) {
-                UIEngine.overlayContext.schedule(0.5) {
+                UIEngine.schedule(0.5) {
                     body.color = WHITE
-                    UIEngine.overlayContext.schedule(0.5) {
+                    UIEngine.schedule(0.5) {
                         body.color = BLACK
-                        UIEngine.overlayContext.schedule(0.5) {
+                        UIEngine.schedule(0.5) {
                             body.color = WHITE
-                            UIEngine.overlayContext.schedule(0.5) {
+                            UIEngine.schedule(0.5) {
                                 body.color = BLACK
                             }
                         }
@@ -215,7 +226,7 @@ class CheatsMod: KotlinMod() {
     }
 
     fun loop() {
-        UIEngine.overlayContext.schedule(0.1) {
+        UIEngine.schedule(0.1) {
             UIEngine.overlayContext.children[0].offset.x = Math.random() * 100.0
             loop()
         }

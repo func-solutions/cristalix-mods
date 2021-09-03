@@ -1,8 +1,8 @@
 package ru.cristalix.mods.resourcepackviewer
 
-import KotlinMod
 import com.mojang.authlib.GameProfile
 import dev.xdark.clientapi.ClientApi
+import dev.xdark.clientapi.entity.Entity
 import dev.xdark.clientapi.entity.EntityPlayer
 import dev.xdark.clientapi.entity.EntityProvider
 import dev.xdark.clientapi.entry.ModMain
@@ -37,9 +37,9 @@ import dev.xdark.clientapi.opengl.RenderHelper
 import dev.xdark.clientapi.game.Minecraft
 import dev.xdark.clientapi.item.ItemStack
 
-import dev.xdark.clientapi.render.RenderManager
 import dev.xdark.clientapi.render.model.ItemCameraTransforms
-import ru.cristalix.uiengine.element.animate
+import ru.cristalix.clientapi.KotlinMod
+import ru.cristalix.uiengine.eventloop.animate
 import java.util.*
 import java.util.stream.Collectors
 import kotlin.collections.ArrayList
@@ -85,7 +85,7 @@ class ResourcePackViewerMod : KotlinMod() {
 
         var scroll = 0.0
 
-        UIEngine.registerHandler(GameTickPre::class.java) {
+        registerHandler<GameTickPre> {
             val d = Mouse.getDWheel()
             if (d != 0) itemDiv.animate(0.2, Easings.EXPO_OUT) {
                 scroll += d / 3.0
@@ -93,7 +93,7 @@ class ResourcePackViewerMod : KotlinMod() {
             }
         }
 
-        UIEngine.registerHandler(GameLoop::class.java) {
+        registerHandler<GameLoop> {
 
             itemDiv.children.forEach {
                 it.enabled = it.offset.y + 18 > -scroll && it.offset.y - 18 < -scroll + clientApi.resolution().scaledHeight
@@ -102,14 +102,15 @@ class ResourcePackViewerMod : KotlinMod() {
         }
 
         UIEngine.overlayContext.addChild(rectangle {
+
+            val pig = UIEngine.clientApi.entityProvider().newEntity(EntityProvider.PIG, UIEngine.clientApi.minecraft().world)
+
             align = RIGHT
             offset.x = -60.0
             offset.y = 60.0
             color = WHITE
             afterRender = {
 
-
-                if (currentItem != null) clientApi.renderItem().renderItem(currentItem, ItemCameraTransforms.Type.GROUND)
 
                 GlStateManager.enableColorMaterial()
                 GlStateManager.pushMatrix()
@@ -118,39 +119,18 @@ class ResourcePackViewerMod : KotlinMod() {
                 val scale = 50f
                 GlStateManager.scale(-scale as Float, scale as Float, scale as Float)
                 GlStateManager.rotate(180.0f, 0.0f, 0.0f, 1.0f)
-//                val f: Float = ent.renderYawOffset
-//                val f1: Float = ent.rotationYaw
-//                val f2: Float = ent.rotationPitch
-//                val f3: Float = ent.prevRotationYawHead
-//                val f4: Float = ent.rotationYawHead
                 GlStateManager.rotate(135.0f, 0.0f, 1.0f, 0.0f)
                 RenderHelper.enableStandardItemLighting()
                 GlStateManager.rotate(-135.0f, 0.0f, 1.0f, 0.0f)
-//                GlStateManager.rotate(-Math.atan((mouseY / 40.0f) as Double).toFloat() * 20.0f, 1.0f, 0.0f, 0.0f)
-//                ent.renderYawOffset = Math.atan((mouseX / 40.0f) as Double).toFloat() * 20.0f
-//                ent.rotationYaw = Math.atan((mouseX / 40.0f) as Double).toFloat() * 40.0f
                 GlStateManager.rotate((Math.abs((System.currentTimeMillis() % 4000) / 4000f * 60f - 30f) - 15f).toFloat(), 1f, 0f, 0f)
                 GlStateManager.rotate(((System.currentTimeMillis() % 2000) / 2000f * 360f).toFloat(), 0f, 1f, 0f)
-//                ent.rotationPitch = -Math.atan((mouseY / 40.0f) as Double).toFloat() * 20.0f
-                npc.setPitch(15f)
+                pig.setPitch(15f)
 
-//                ent.rotationYawHead = ent.rotationYaw
-//                ent.prevRotationYawHead = ent.rotationYaw
-//                G.translate(0.0f, 0.0f, 0.0f)
-//                val rendermanager: RenderManager = Minecraft.getMinecraft().getRenderManager()
-//                rendermanager.setPlayerViewY(180.0f)
-//                rendermanager.setRenderShadow(false)
 
-                UIEngine.clientApi.minecraft().renderManager
-                    .renderEntity(npc, 0.0, 0.0, 0.0, 0f, 0f, true)
+                // ToDo: Uncomment
+                UIEngine.clientApi.minecraft().entityRenderManager
+                    .renderEntity(pig, 0.0, 0.0, 0.0, 0f, 0f, true)
 
-//                rendermanager.renderEntityWithPosYaw(ent, 0.0, 0.0, 0.0, 0.0f, 1.0f)
-//                rendermanager.setRenderShadow(true)
-//                ent.renderYawOffset = f
-//                ent.rotationYaw = f1
-//                ent.rotationPitch = f2
-//                ent.prevRotationYawHead = f3
-//                ent.rotationYawHead = f4
                 GlStateManager.popMatrix()
                 RenderHelper.disableStandardItemLighting()
                 GlStateManager.disableRescaleNormal()
@@ -182,16 +162,22 @@ class ResourcePackViewerMod : KotlinMod() {
         }
 
 
-        UIEngine.registerHandler(RenderTickPre::class.java) {
+        registerHandler<RenderTickPre> {
             hint.offset.x = (Mouse.getX() / UIEngine.clientApi.resolution().scaleFactor).toDouble()
             hint.offset.y = ((Display.getHeight() - Mouse.getY()) / UIEngine.clientApi.resolution().scaleFactor).toDouble()
         }
 
-        loadFrom(Paths.get("assets-addon/assets/minecraft/mcpatcher/cit"))
 
+        var loaded = false
         UIEngine.overlayContext.addChild(hint)
-        UIEngine.registerHandler(KeyPress::class.java) {
-            if (key == KEY_J) unload()
+        registerHandler<KeyPress> {
+            if (key == KEY_J) {
+                if (!loaded) {
+                    loadFrom(Paths.get("assets-addon/assets/minecraft/mcpatcher/cit"))
+                    loaded = true
+                }
+                itemDiv.enabled = !itemDiv.enabled
+            }
         }
 
     }
@@ -268,8 +254,8 @@ class ResourcePackViewerMod : KotlinMod() {
                             offset.x = ix * 18.0
                             offset.y = iy * 18.0
                             val cmd = "/give @p $address 1 $damage {${nbt.joinToString(",")}}"
-                            onClick = { _, buttonDown, button ->
-                                if (buttonDown) {
+                            onClick {
+                                if (down) {
                                     if (button == MouseButton.LEFT) {
                                         UIEngine.clientApi.chat().sendChatMessage(cmd)
                                     } else if (button == MouseButton.RIGHT) {
@@ -280,7 +266,7 @@ class ResourcePackViewerMod : KotlinMod() {
                                 }
                             }
 
-                            onHover = { _, hovered ->
+                            onHover {
                                 if (hovered) {
 
                                     val slot: Int = if (address.contains("boots")) 36

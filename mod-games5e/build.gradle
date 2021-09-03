@@ -1,0 +1,3 @@
+bundler {
+    mainClass 'dev.implario.games5e.cristalix.mod.Games5eMod'
+}
