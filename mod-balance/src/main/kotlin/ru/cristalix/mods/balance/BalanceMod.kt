@@ -1,39 +1,107 @@
+@file:Suppress("LocalVariableName")
+
 package ru.cristalix.mods.balance
 
-import dev.xdark.clientapi.entry.ModMain
-import dev.xdark.clientapi.event.input.KeyPress
-import dev.xdark.clientapi.event.network.PluginMessage
-import org.lwjgl.input.Keyboard.KEY_J
 import ru.cristalix.clientapi.KotlinMod
 import ru.cristalix.uiengine.UIEngine
 import ru.cristalix.uiengine.element.RectangleElement
 import ru.cristalix.uiengine.element.TextElement
 import ru.cristalix.uiengine.eventloop.animate
 import ru.cristalix.uiengine.utility.*
+import kotlin.math.abs
 import kotlin.math.absoluteValue
+import kotlin.math.log10
+import kotlin.math.pow
+
+//fun main() {
+//
+//    val a_long: Long = 666666666666666666
+//    val b_long: Long = 333333333333333333
+//    val diff_long = a_long - b_long
+//
+//    val a_double: Double = a_long.toDouble()
+//    val b_double: Double = b_long.toDouble()
+//    val diff_double = (a_double - b_double).toLong()
+//
+//    println(diff_long)
+//    println(diff_double)
+//}
+//fun main() {
+//    fun a(d: Double) = println("$d : " + commas(d))
+//    a(0.0) // 0.0 = 0
+//    a(0.00001) // 0.00001 = 0
+//    a(0.000001) // 0.000001 = 0
+//    a(0.1) // 0.1 = 0.1
+//    a(0.01) // 0.01 = 0.01
+//    a(1.0) // 1.0 = 1
+//    a(1.01) // 1.01 = 1.01
+//    a(1.000001) // 1.000001 = 1
+//    a(100.000001) // 100.000001 = 100
+//    a(100.0) // 100.0 = 100
+//    a(1000.0) // 1000.0 = 1,000
+//    a(1000.01) // 1000.01 = 1,000.01
+//    a(-1000.01) // -1000.01 = -1,000.01
+//    a(-10000.01) // -10000.01 = -10,000.01
+//    a(-5234234.985) // -5234234.985 = -5,234,234.985
+//    a(-2423434234.985) // -2423434234.985 = -2,423,434,234.985
+//    a(-24234342545345.985) // -24234342545345.985 = -24,234,342,545,345.9843
+//    a(24_234_342_545_345.985) // 24234342545345.985 = 24,234,342,545,345.9843
+//}
 
 fun commas(n: Double): String {
-    var newStr = ""
-    var digits = -1
-//    val ss = n.toInt().toString().split('.')
-    val str = n.toInt().toString()
-    val d1 = (n - n.toInt()).toFloat()
-    var d = "$d1"
-    if (d.indexOf('.') >= 0) d = d.substring(d.indexOf('.') + 1)
-
-    str.reversed().forEach {
-        if (it == '-') newStr = "-$newStr"
-        else {
-            newStr = it + if (digits++ == 2) ",$newStr" else "" + newStr
-            if (digits == 3) digits = 0
+    if (n == 0.0) return "0"
+    var whole = abs(n)
+    val wholeDigitCount = log10(whole).toInt() + 1
+    var str = if (n < 0) "-" else ""
+    if (wholeDigitCount > 0) {
+        repeat(wholeDigitCount) {
+            val digitShifted = 10.0.pow(wholeDigitCount - it - 1)
+            val digit = (whole / digitShifted).toInt()
+            val newWhole = whole % digitShifted
+            str += digit
+            if ((wholeDigitCount - it) % 3 == 1 && wholeDigitCount != it + 1) str += ","
+            whole = newWhole
         }
+    } else {
+        str += "0"
     }
 
-    if (newStr.isEmpty()) newStr = "0"
+    whole = (whole + 0.000005) * 10_000
+    if (whole != 0.0 && n < 100000) {
 
+        val fraction = (10_000 + whole).toInt()
+        var fractionStr = fraction.toString()
+        while (fractionStr.endsWith("0")) fractionStr = fractionStr.substring(0, fractionStr.length - 1)
+        fractionStr = fractionStr.substring(1)
+        if (fractionStr.isNotEmpty()) str += ".$fractionStr"
+    }
 
-    return if (d1 < 0.0001) newStr else "$newStr.$d"
+    return str
 }
+
+//fun commas(n: Double): String {
+//    var newStr = ""
+//    var digits = -1
+////    val ss = n.toInt().toString().split('.')
+//    val str = n.toInt().toString()
+//    val d1 = (n - n.toInt()).toFloat()
+//
+//    var d = "$d1"
+//    if (d.indexOf('.') >= 0) d = d.substring(d.indexOf('.') + 1)
+//
+//    str.reversed().forEach {
+//        if (it == '-') newStr = "-$newStr"
+//        else {
+//            newStr = it + if (digits++ == 2) ",$newStr" else "" + newStr
+//            if (digits == 3) digits = 0
+//        }
+//    }
+//
+//    if (newStr.isEmpty()) newStr = "0"
+//
+//
+//    return if (d1 < 0.0001) newStr else "$newStr.$d"
+//}
 
 
 class BalanceMod : KotlinMod() {
